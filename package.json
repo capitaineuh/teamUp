@@ -1,0 +1,42 @@
+{
+  "name": "teamup-app-web",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@react-native-firebase/app": "^22.1.0",
+    "@react-native-firebase/auth": "^22.1.0",
+    "@react-navigation/native": "^6.1.4",
+    "@react-navigation/native-stack": "^6.9.10",
+    "firebase": "^11.7.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-native": "0.71.0",
+    "react-native-gesture-handler": "^2.9.0",
+    "react-native-reanimated": "^2.9.1",
+    "react-native-safe-area-context": "^3.3.2",
+    "react-native-screens": "^3.18.0",
+    "react-native-web": "0.18.10"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-react": "^7.16.5",
+    "@babel/preset-typescript": "^7.16.0",
+    "@types/react-navigation": "^3.0.8",
+    "babel-loader": "^8.2.2",
+    "css-loader": "^7.1.2",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.0",
+    "react-native-dotenv": "^3.4.11",
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.5.4",
+    "webpack": "^5.65.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.6.0"
+  },
+  "scripts": {
+    "web": "webpack serve --mode development"
+  },
+  "main": "index.web.js"
+}
