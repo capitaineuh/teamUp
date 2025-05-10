@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
 import Screen from '../components/Screen';
+import { getUserProfile, updateUserProfile, UserProfile } from '../services/firestore';
+import Toast from '../components/Toast';
 
 // Types pour les sports et niveaux
 type SportLevel = 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Expert';
@@ -12,10 +14,38 @@ type Sport = {
 
 const ProfileScreen = () => {
   const { user } = useAuth();
-  const [displayName, setDisplayName] = useState(user?.displayName || '');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [displayName, setDisplayName] = useState('');
   const [sports, setSports] = useState<Sport[]>([
     { name: '', level: 'Débutant' }
   ]);
+  const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({
+    show: false,
+    message: '',
+    type: 'success',
+  });
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (user) {
+        try {
+          const profile = await getUserProfile(user.uid);
+          if (profile) {
+            setDisplayName(profile.displayName);
+            setSports(profile.sports.length > 0 ? profile.sports : [{ name: '', level: 'Débutant' }]);
+          } else {
+            setDisplayName(user.displayName || '');
+          }
+        } catch (error) {
+          Alert.alert('Erreur', 'Impossible de charger le profil');
+        }
+      }
+      setLoading(false);
+    };
+
+    loadProfile();
+  }, [user]);
 
   const handleAddSport = () => {
     setSports([...sports, { name: '', level: 'Débutant' }]);
@@ -36,17 +66,40 @@ const ProfileScreen = () => {
   };
 
   const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
     try {
-      // TODO: Implémenter la sauvegarde dans Firebase
-      Alert.alert('Succès', 'Profil mis à jour avec succès');
+      await updateUserProfile(user.uid, {
+        displayName,
+        sports,
+      });
+      setToast({
+        show: true,
+        message: 'Profil mis à jour avec succès !',
+        type: 'success',
+      });
     } catch (error) {
-      Alert.alert('Erreur', 'Impossible de mettre à jour le profil');
+      setToast({
+        show: true,
+        message: 'Erreur lors de la sauvegarde du profil',
+        type: 'error',
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
   return (
-    <Screen>
-      <ScrollView style={styles.container}>
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
           <Text style={styles.title}>Mon Profil</Text>
         </View>
@@ -125,18 +178,40 @@ const ProfileScreen = () => {
         </View>
 
         <TouchableOpacity 
-          style={styles.saveButton}
+          style={[styles.saveButton, saving && styles.saveButtonDisabled]}
           onPress={handleSave}
+          disabled={saving}
         >
-          <Text style={styles.saveButtonText}>Enregistrer les modifications</Text>
+          {saving ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={styles.saveButtonText}>Enregistrer les modifications</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
-    </Screen>
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onHide={() => setToast({ ...toast, show: false })}
+        />
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  scrollView: {
     flex: 1,
   },
   header: {
@@ -235,6 +310,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#007AFF',
     borderRadius: 8,
     alignItems: 'center',
+  },
+  saveButtonDisabled: {
+    opacity: 0.7,
   },
   saveButtonText: {
     color: 'white',
