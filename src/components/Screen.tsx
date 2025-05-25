@@ -1,25 +1,17 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import './Screen.css';
 
 interface ScreenProps {
   children: React.ReactNode;
-  style?: ViewStyle;
+  className?: string;
 }
 
-const Screen: React.FC<ScreenProps> = ({ children, style }) => {
+const Screen: React.FC<ScreenProps> = ({ children, className }) => {
   return (
-    <View style={[styles.container, style]}>
+    <div className={`screen-container ${className || ''}`}>
       {children}
-    </View>
+    </div>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f5f5f5',
-  },
-});
 
 export default Screen; 
