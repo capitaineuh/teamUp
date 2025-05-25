@@ -8,7 +8,7 @@ const App = () => {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
       <View style={styles.appContainer}>
-        <AppNavigator />
+      <AppNavigator />
       </View>
     </View>
   );

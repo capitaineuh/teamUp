@@ -107,7 +107,7 @@ const HomeScreen = () => {
               <Text style={styles.modalButtonTextSecondary}>Fermer</Text>
             </TouchableOpacity>
           </View>
-        </View>
+    </View>
       </Modal>
     </Screen>
   );

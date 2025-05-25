@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
-import Screen from '../components/Screen';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
 import { getUserProfile, updateUserProfile, UserProfile } from '../services/firestore';
 import Toast from '../components/Toast';
 
@@ -13,6 +15,7 @@ type Sport = {
 };
 
 const ProfileScreen = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -99,11 +102,16 @@ const ProfileScreen = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.navigate('Home')}
+        >
+          <Text style={styles.backButtonText}>← Retour</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>Mon Profil</Text>
+      </View>
       <ScrollView style={styles.scrollView}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Mon Profil</Text>
-        </View>
-
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Informations personnelles</Text>
           <View style={styles.inputGroup}>
@@ -217,6 +225,16 @@ const styles = StyleSheet.create({
   header: {
     padding: 20,
     backgroundColor: '#007AFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    marginRight: 15,
+  },
+  backButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
   title: {
     fontSize: 24,
