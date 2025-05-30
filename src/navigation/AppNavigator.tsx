@@ -10,7 +10,7 @@ const AppNavigator = () => {
       <Route path="/profile" element={<ProfileScreen />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-  );
+);
 };
 
 export default AppNavigator;

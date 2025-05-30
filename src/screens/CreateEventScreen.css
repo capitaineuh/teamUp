@@ -1,0 +1,88 @@
+.create-event-screen {
+  max-width: 500px;
+  margin: 2rem auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 2rem 1.5rem;
+}
+
+.create-event-screen h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #007AFF;
+}
+
+.event-form .form-group {
+  margin-bottom: 1.25rem;
+}
+
+.event-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.event-form input,
+.event-form select,
+.event-form textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.event-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.submit-btn {
+  width: 100%;
+  background: #007AFF;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background 0.2s;
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #ff4444;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.success {
+  color: #28a745;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .create-event-screen {
+    padding: 1rem 0.5rem;
+  }
+  .event-form input,
+  .event-form select,
+  .event-form textarea {
+    font-size: 0.95rem;
+    padding: 0.6rem;
+  }
+  .submit-btn {
+    font-size: 1rem;
+    padding: 0.8rem;
+  }
+} 
