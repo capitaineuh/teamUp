@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { getEvents, joinEvent, leaveEvent, deleteEvent, updateEvent } from '../services/events';
+import Map from '../components/Map';
+import { GOOGLE_MAPS_API_KEY } from '../config/maps';
 import './HomeScreen.css';
 
 const HomeScreen = () => {
@@ -18,6 +20,12 @@ const HomeScreen = () => {
   const [editForm, setEditForm] = useState<any>({});
   const [savingEdit, setSavingEdit] = useState(false);
   const editRefs = useRef<{ [key: string]: any }>({});
+  const titreRef = useRef<HTMLSpanElement>(null);
+  const sportRef = useRef<HTMLSpanElement>(null);
+  const niveauRef = useRef<HTMLSpanElement>(null);
+  const participantsRef = useRef<HTMLSpanElement>(null);
+  const lieuRef = useRef<HTMLSpanElement>(null);
+  const descriptionRef = useRef<HTMLSpanElement>(null);
 
   const handleAuth = async () => {
     if (user) {
@@ -43,6 +51,17 @@ const HomeScreen = () => {
   useEffect(() => {
     fetchEvents();
   }, []);
+
+  useEffect(() => {
+    if (editingId) {
+      if (titreRef.current) titreRef.current.innerText = editForm.titre || '';
+      if (sportRef.current) sportRef.current.innerText = editForm.sport || '';
+      if (niveauRef.current) niveauRef.current.innerText = editForm.niveau || '';
+      if (participantsRef.current) participantsRef.current.innerText = String(editForm.required_participants ?? '');
+      if (lieuRef.current) lieuRef.current.innerText = editForm.lieu || '';
+      if (descriptionRef.current) descriptionRef.current.innerText = editForm.description || '';
+    }
+  }, [editingId, editForm]);
 
   const handleJoin = async (eventId: string) => {
     if (!user) return;
@@ -86,21 +105,26 @@ const HomeScreen = () => {
   };
 
   const handleEditSave = async (eventId: string) => {
-    const fields = ['titre', 'sport', 'niveau', 'required_participants', 'lieu', 'description'];
-    const newData: any = {};
-    fields.forEach(field => {
-      if (editRefs.current[field]) {
-        let value = editRefs.current[field].innerText;
-        if (field === 'required_participants') value = Number(value);
-        newData[field] = value;
-      }
-    });
     setSavingEdit(true);
-    await updateEvent(eventId, newData);
+    await updateEvent(eventId, editForm);
     await fetchEvents();
     setEditingId(null);
     setEditForm({});
     setSavingEdit(false);
+  };
+
+  const handleEditChange = (field: string, value: string) => {
+    setEditForm((prev: {
+      titre: string;
+      sport: string;
+      niveau: string;
+      required_participants: number;
+      lieu: string;
+      description: string;
+    }) => ({
+      ...prev,
+      [field]: field === 'required_participants' ? Number(value) : value
+    }));
   };
 
   const containerVariants = {
@@ -224,6 +248,21 @@ const HomeScreen = () => {
           </div>
         </section>
 
+        <section className="map-section">
+          <motion.h2 className="section-title" variants={itemVariants}>
+            Carte des événements
+          </motion.h2>
+          <motion.div
+            className="map-container"
+            variants={itemVariants}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+          >
+            <Map apiKey={GOOGLE_MAPS_API_KEY} />
+          </motion.div>
+        </section>
+
         <section className="events-section">
           <h2 className="events-title">Événements sportifs</h2>
           {loadingEvents ? (
@@ -239,107 +278,136 @@ const HomeScreen = () => {
                 const isEditing = editingId === event.id;
                 return (
                   <div className="event-card" key={event.id}>
-                    {isEditing ? (
-                      <>
+                    <h3 className="event-title">
+                      {isEditing ? (
                         <span
                           contentEditable
                           suppressContentEditableWarning
-                          ref={el => (editRefs.current['titre'] = el)}
-                          className="event-title"
+                          ref={titreRef}
+                          onInput={e => handleEditChange('titre', e.currentTarget.innerText)}
                           style={{ outline: 'none' }}
-                          >{event.titre}</span>
-                        <div className="event-meta">
+                        />
+                      ) : event.titre}
+                    </h3>
+                    <div className="event-meta">
+                      <span>
+                        <b>Sport :</b>{' '}
+                        {isEditing ? (
                           <span
                             contentEditable
                             suppressContentEditableWarning
-                            ref={el => (editRefs.current['sport'] = el)}
+                            ref={sportRef}
+                            onInput={e => handleEditChange('sport', e.currentTarget.innerText)}
                             style={{ outline: 'none' }}
-                          >{event.sport}</span>
-                          {' | '}
+                          />
+                        ) : event.sport}
+                      </span>
+                      {' | '}
+                      <span>
+                        <b>Niveau :</b>{' '}
+                        {isEditing ? (
                           <span
                             contentEditable
                             suppressContentEditableWarning
-                            ref={el => (editRefs.current['niveau'] = el)}
+                            ref={niveauRef}
+                            onInput={e => handleEditChange('niveau', e.currentTarget.innerText)}
                             style={{ outline: 'none' }}
-                          >{event.niveau}</span>
-                          {' | '}
+                          />
+                        ) : event.niveau}
+                      </span>
+                      {' | '}
+                      <span>
+                        <b>Participants :</b>{' '}
+                        {isEditing ? (
                           <span
                             contentEditable
                             suppressContentEditableWarning
-                            ref={el => (editRefs.current['required_participants'] = el)}
+                            ref={participantsRef}
+                            onInput={e => handleEditChange('required_participants', e.currentTarget.innerText)}
                             style={{ outline: 'none', minWidth: 30, display: 'inline-block' }}
-                          >{event.required_participants}</span>
-                        </div>
-                        <div className="event-meta">
+                          />
+                        ) : `${nbInscrits} / ${event.required_participants}`}
+                      </span>
+                    </div>
+                    <div className="event-meta">
+                      <span>
+                        <b>Lieu :</b>{' '}
+                        {isEditing ? (
                           <span
                             contentEditable
                             suppressContentEditableWarning
-                            ref={el => (editRefs.current['lieu'] = el)}
+                            ref={lieuRef}
+                            onInput={e => handleEditChange('lieu', e.currentTarget.innerText)}
                             style={{ outline: 'none' }}
-                          >{event.lieu}</span>
-                        </div>
+                          />
+                        ) : event.lieu}
+                      </span>
+                    </div>
+                    <p className="event-description">
+                      {isEditing ? (
                         <span
                           contentEditable
                           suppressContentEditableWarning
-                          ref={el => (editRefs.current['description'] = el)}
+                          ref={descriptionRef}
+                          onInput={e => handleEditChange('description', e.currentTarget.innerText)}
                           style={{ outline: 'none', display: 'block', marginTop: 4 }}
-                        >{event.description}</span>
-                        <div className="event-actions">
-                          <button className="event-action-btn join-btn" onClick={() => handleEditSave(event.id)} disabled={savingEdit}>{savingEdit ? 'Enregistrement...' : 'Enregistrer'}</button>
-                          <button className="event-action-btn leave-btn" onClick={handleEditCancel} disabled={savingEdit}>Annuler</button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <h3 className="event-title">{event.titre}</h3>
-                        <div className="event-meta">
-                          <span><b>Sport :</b> {event.sport}</span> | <span><b>Niveau :</b> {event.niveau}</span> | <span><b>Participants :</b> {nbInscrits} / {event.required_participants}</span>
-                        </div>
-                        <div className="event-meta">
-                          <span><b>Lieu :</b> {event.lieu}</span>
-                        </div>
-                        <p className="event-description">{event.description}</p>
-                        {user && (
-                          <div className="event-actions">
-                            {dejaInscrit ? (
-                              <button
-                                className="event-action-btn leave-btn"
-                                onClick={() => handleLeave(event.id)}
-                                disabled={leavingId === event.id}
-                              >
-                                {leavingId === event.id ? 'Désinscription...' : 'Se désinscrire'}
-                              </button>
-                            ) : (
-                              <button
-                                className="event-action-btn join-btn"
-                                onClick={() => handleJoin(event.id)}
-                                disabled={joiningId === event.id || nbInscrits >= event.required_participants}
-                              >
-                                {joiningId === event.id ? 'Inscription...' : nbInscrits >= event.required_participants ? 'Complet' : "S'inscrire"}
-                              </button>
-                            )}
-                            {isCreator && (
-                              <>
+                        />
+                      ) : event.description}
+                    </p>
+                    <div className="event-actions">
+                      {isEditing ? (
+                        <>
+                          <button className="event-action-btn join-btn" onClick={() => handleEditSave(event.id)} disabled={savingEdit}>
+                            {savingEdit ? 'Enregistrement...' : 'Enregistrer'}
+                          </button>
+                          <button className="event-action-btn leave-btn" onClick={handleEditCancel} disabled={savingEdit}>
+                            Annuler
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {user && (
+                            <>
+                              {dejaInscrit ? (
                                 <button
-                                  className="event-action-btn edit-btn"
-                                  onClick={() => handleEdit(event)}
-                                  disabled={editingId !== null}
+                                  className="event-action-btn leave-btn"
+                                  onClick={() => handleLeave(event.id)}
+                                  disabled={leavingId === event.id}
                                 >
-                                  Modifier
+                                  {leavingId === event.id ? 'Désinscription...' : 'Se désinscrire'}
                                 </button>
+                              ) : (
                                 <button
-                                  className="event-action-btn delete-btn"
-                                  onClick={() => handleDelete(event.id)}
-                                  disabled={deletingId === event.id}
+                                  className="event-action-btn join-btn"
+                                  onClick={() => handleJoin(event.id)}
+                                  disabled={joiningId === event.id || nbInscrits >= event.required_participants}
                                 >
-                                  {deletingId === event.id ? 'Suppression...' : 'Supprimer'}
+                                  {joiningId === event.id ? 'Inscription...' : nbInscrits >= event.required_participants ? 'Complet' : "S'inscrire"}
                                 </button>
-                              </>
-                            )}
-                          </div>
-                        )}
-                      </>
-                    )}
+                              )}
+                              {isCreator && (
+                                <>
+                                  <button
+                                    className="event-action-btn edit-btn"
+                                    onClick={() => handleEdit(event)}
+                                    disabled={editingId !== null}
+                                  >
+                                    Modifier
+                                  </button>
+                                  <button
+                                    className="event-action-btn delete-btn"
+                                    onClick={() => handleDelete(event.id)}
+                                    disabled={deletingId === event.id}
+                                  >
+                                    {deletingId === event.id ? 'Suppression...' : 'Supprimer'}
+                                  </button>
+                                </>
+                              )}
+                            </>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
                 );
               })}
