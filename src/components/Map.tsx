@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { GoogleMap, LoadScript, Marker, InfoWindow, useJsApiLoader, Libraries } from '@react-google-maps/api';
+import { GoogleMap, Marker, InfoWindow, useJsApiLoader, Libraries } from '@react-google-maps/api';
 import { getEvents } from '../services/events';
 import { Event } from '../types/event';
 

@@ -19,7 +19,7 @@ const HomeScreen = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
   const [savingEdit, setSavingEdit] = useState(false);
-  const editRefs = useRef<{ [key: string]: any }>({});
+
   const titreRef = useRef<HTMLSpanElement>(null);
   const sportRef = useRef<HTMLSpanElement>(null);
   const niveauRef = useRef<HTMLSpanElement>(null);
