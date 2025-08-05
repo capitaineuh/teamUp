@@ -3,14 +3,14 @@
   margin: 2rem auto;
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   padding: 2rem 1.5rem;
 }
 
 .create-event-screen h1 {
   text-align: center;
   margin-bottom: 2rem;
-  color: #007AFF;
+  color: #007aff;
 }
 
 .event-form .form-group {
@@ -42,7 +42,7 @@
 
 .submit-btn {
   width: 100%;
-  background: #007AFF;
+  background: #007aff;
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -85,4 +85,4 @@
     font-size: 1rem;
     padding: 0.8rem;
   }
-} 
+}

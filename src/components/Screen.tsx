@@ -8,10 +8,8 @@ interface ScreenProps {
 
 const Screen: React.FC<ScreenProps> = ({ children, className }) => {
   return (
-    <div className={`screen-container ${className || ''}`}>
-      {children}
-    </div>
+    <div className={`screen-container ${className || ''}`}>{children}</div>
   );
 };
 
-export default Screen; 
+export default Screen;

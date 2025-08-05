@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from './useAuth';
+import { useState, useEffect, useCallback } from 'react';
+
 import { getUserProfile, updateUserProfile } from '../services/firestore';
 import { UserProfile } from '../types/user';
+
+import { useAuth } from './useAuth';
 
 export const useProfile = () => {
   const { user } = useAuth();
@@ -9,7 +11,7 @@ export const useProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     if (!user) {
       setLoading(false);
       return;
@@ -24,11 +26,11 @@ export const useProfile = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     loadProfile();
-  }, [user]);
+  }, [user, loadProfile]);
 
   const updateProfile = async (newProfile: UserProfile) => {
     if (!user) {
@@ -49,6 +51,6 @@ export const useProfile = () => {
     profile,
     loading,
     error,
-    updateProfile
+    updateProfile,
   };
-}; 
+};

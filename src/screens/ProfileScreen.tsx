@@ -1,10 +1,11 @@
+import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+
+import Toast from '../components/Toast';
 import { useAuth } from '../hooks/useAuth';
 import { useProfile } from '../hooks/useProfile';
 import { UserProfile } from '../types/user';
-import Toast from '../components/Toast';
 import './ProfileScreen.css';
 
 const containerVariants = {
@@ -12,10 +13,10 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      when: "beforeChildren",
-      staggerChildren: 0.1
-    }
-  }
+      when: 'beforeChildren',
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 const itemVariants = {
@@ -24,22 +25,27 @@ const itemVariants = {
     opacity: 1,
     y: 0,
     transition: {
-      type: "spring",
-      stiffness: 100
-    }
-  }
+      type: 'spring',
+      stiffness: 100,
+    },
+  },
 };
 
 const initialFormData: UserProfile = {
   displayName: '',
   email: '',
-  sports: []
+  sports: [],
 };
 
 const ProfileScreen: React.FC = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { profile, loading: profileLoading, error, updateProfile } = useProfile();
+  const {
+    profile,
+    loading: profileLoading,
+    error,
+    updateProfile,
+  } = useProfile();
   const [formData, setFormData] = useState<UserProfile>(initialFormData);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -55,42 +61,48 @@ const ProfileScreen: React.FC = () => {
       setFormData({
         displayName: profile.displayName || '',
         email: profile.email || '',
-        sports: profile.sports || []
+        sports: profile.sports || [],
       });
     }
   }, [profile]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleSportChange = (index: number, field: 'name' | 'level', value: string) => {
+  const handleSportChange = (
+    index: number,
+    field: 'name' | 'level',
+    value: string
+  ) => {
     const newSports = [...formData.sports];
     newSports[index] = {
       ...newSports[index],
-      [field]: value
+      [field]: value,
     };
     setFormData(prev => ({
       ...prev,
-      sports: newSports
+      sports: newSports,
     }));
   };
 
   const addSport = () => {
     setFormData(prev => ({
       ...prev,
-      sports: [...prev.sports, { name: '', level: 'débutant' }]
+      sports: [...prev.sports, { name: '', level: 'débutant' }],
     }));
   };
 
   const removeSport = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      sports: prev.sports.filter((_, i) => i !== index)
+      sports: prev.sports.filter((_, i) => i !== index),
     }));
   };
 
@@ -108,26 +120,26 @@ const ProfileScreen: React.FC = () => {
 
   if (authLoading || profileLoading) {
     return (
-      <motion.div 
-        className="profile-screen"
+      <motion.div
+        className='profile-screen'
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        <div className="loading">Chargement...</div>
+        <div className='loading'>Chargement...</div>
       </motion.div>
     );
   }
 
   if (error) {
     return (
-      <motion.div 
-        className="profile-screen"
+      <motion.div
+        className='profile-screen'
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        <div className="error">Erreur: {error}</div>
+        <div className='error'>Erreur: {error}</div>
       </motion.div>
     );
   }
@@ -137,16 +149,21 @@ const ProfileScreen: React.FC = () => {
   }
 
   return (
-    <motion.div 
-      className="profile-screen"
+    <motion.div
+      className='profile-screen'
       key={user?.uid || 'profile'}
-      initial="hidden"
-      animate="visible"
+      initial='hidden'
+      animate='visible'
       variants={containerVariants}
     >
-      <motion.div className="profile-header" variants={itemVariants} initial="hidden" animate="visible">
-        <motion.button 
-          className="back-button"
+      <motion.div
+        className='profile-header'
+        variants={itemVariants}
+        initial='hidden'
+        animate='visible'
+      >
+        <motion.button
+          className='back-button'
           onClick={() => navigate('/')}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -156,34 +173,34 @@ const ProfileScreen: React.FC = () => {
         <motion.h1 variants={itemVariants}>Mon Profil</motion.h1>
       </motion.div>
 
-      <motion.form 
-        className="profile-container"
+      <motion.form
+        className='profile-container'
         onSubmit={handleSubmit}
         variants={itemVariants}
-        initial="hidden"
-        animate="visible"
+        initial='hidden'
+        animate='visible'
       >
-        <motion.div className="profile-section" variants={itemVariants}>
+        <motion.div className='profile-section' variants={itemVariants}>
           <h2>Informations personnelles</h2>
-          <div className="form-group">
-            <label htmlFor="displayName">Nom d'affichage</label>
+          <div className='form-group'>
+            <label htmlFor='displayName'>Nom d&apos;affichage</label>
             <motion.input
               whileFocus={{ scale: 1.02 }}
-              type="text"
-              id="displayName"
-              name="displayName"
+              type='text'
+              id='displayName'
+              name='displayName'
               value={formData.displayName}
               onChange={handleInputChange}
               required
             />
           </div>
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
+          <div className='form-group'>
+            <label htmlFor='email'>Email</label>
             <motion.input
               whileFocus={{ scale: 1.02 }}
-              type="email"
-              id="email"
-              name="email"
+              type='email'
+              id='email'
+              name='email'
               value={formData.email}
               onChange={handleInputChange}
               required
@@ -191,47 +208,51 @@ const ProfileScreen: React.FC = () => {
           </div>
         </motion.div>
 
-        <motion.div className="profile-section" variants={itemVariants}>
+        <motion.div className='profile-section' variants={itemVariants}>
           <h2>Mes sports</h2>
           <AnimatePresence>
             {formData.sports.map((sport, index) => (
               <motion.div
-                key={index}
-                className="sport-item"
+                key={`sport-${index}-${sport.name}`}
+                className='sport-item'
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
-                transition={{ type: "spring", stiffness: 100 }}
+                transition={{ type: 'spring', stiffness: 100 }}
               >
-                <div className="form-group">
+                <div className='form-group'>
                   <label htmlFor={`sport-${index}`}>Sport</label>
                   <motion.input
                     whileFocus={{ scale: 1.02 }}
-                    type="text"
+                    type='text'
                     id={`sport-${index}`}
                     value={sport.name}
-                    onChange={(e) => handleSportChange(index, 'name', e.target.value)}
+                    onChange={e =>
+                      handleSportChange(index, 'name', e.target.value)
+                    }
                     required
                   />
                 </div>
-                <div className="form-group">
+                <div className='form-group'>
                   <label htmlFor={`level-${index}`}>Niveau</label>
                   <motion.select
                     whileFocus={{ scale: 1.02 }}
                     id={`level-${index}`}
                     value={sport.level}
-                    onChange={(e) => handleSportChange(index, 'level', e.target.value)}
+                    onChange={e =>
+                      handleSportChange(index, 'level', e.target.value)
+                    }
                     required
                   >
-                    <option value="débutant">Débutant</option>
-                    <option value="intermédiaire">Intermédiaire</option>
-                    <option value="avancé">Avancé</option>
-                    <option value="expert">Expert</option>
+                    <option value='débutant'>Débutant</option>
+                    <option value='intermédiaire'>Intermédiaire</option>
+                    <option value='avancé'>Avancé</option>
+                    <option value='expert'>Expert</option>
                   </motion.select>
                 </div>
                 <motion.button
-                  type="button"
-                  className="remove-sport"
+                  type='button'
+                  className='remove-sport'
                   onClick={() => removeSport(index)}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -243,8 +264,8 @@ const ProfileScreen: React.FC = () => {
           </AnimatePresence>
 
           <motion.button
-            type="button"
-            className="add-sport"
+            type='button'
+            className='add-sport'
             onClick={addSport}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -254,8 +275,8 @@ const ProfileScreen: React.FC = () => {
         </motion.div>
 
         <motion.button
-          type="submit"
-          className="save-button"
+          type='submit'
+          className='save-button'
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -276,4 +297,4 @@ const ProfileScreen: React.FC = () => {
   );
 };
 
-export default ProfileScreen; 
+export default ProfileScreen;

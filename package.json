@@ -32,13 +32,15 @@
     "eject": "react-scripts eject",
     "deploy": "npm run build && firebase deploy",
     "deploy:hosting": "npm run build && firebase deploy --only hosting",
-    "clean:deploy": "Remove-Item -Recurse -Force build -ErrorAction SilentlyContinue && npm run build && firebase deploy --only hosting --force"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "clean:deploy": "Remove-Item -Recurse -Force build -ErrorAction SilentlyContinue && npm run build && firebase deploy --only hosting --force",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "code:check": "npm run lint && npm run format:check",
+    "code:fix": "npm run lint:fix && npm run format",
+    "lint:report": "eslint src --ext .js,.jsx,.ts,.tsx --format json --output-file eslint-report.json",
+    "sonar:analyze": "npm run lint:report && sonar-scanner"
   },
   "browserslist": {
     "production": [
@@ -51,5 +53,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "prettier": "^3.6.2"
   }
 }

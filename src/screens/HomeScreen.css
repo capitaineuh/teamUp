@@ -20,7 +20,7 @@
 .header-title {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #007AFF;
+  color: #007aff;
   margin: 0;
 }
 
@@ -46,7 +46,7 @@
 }
 
 .auth-button {
-  background-color: #007AFF;
+  background-color: #007aff;
   color: white;
 }
 
@@ -62,7 +62,7 @@
 
 .welcome-section {
   padding: 2rem 1.5rem;
-  background-color: #007AFF;
+  background-color: #007aff;
   color: white;
   text-align: center;
 }
@@ -163,7 +163,7 @@
   padding: 1rem;
   border-radius: 0.75rem;
   border: none;
-  background-color: #007AFF;
+  background-color: #007aff;
   color: white;
   font-size: 1rem;
   font-weight: 600;
@@ -179,11 +179,11 @@
 
 .modal-button-secondary {
   background-color: transparent;
-  color: #007AFF;
+  color: #007aff;
 }
 
 .error-text {
-  color: #FF3B30;
+  color: #ff3b30;
   margin-bottom: 1rem;
   text-align: center;
 }
@@ -199,8 +199,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Media Queries */
@@ -302,7 +306,7 @@
 .events-title {
   font-size: 1.4rem;
   font-weight: 600;
-  color: #007AFF;
+  color: #007aff;
   margin-bottom: 1.5rem;
   text-align: center;
 }
@@ -318,13 +322,13 @@
 .event-card {
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   padding: 1.25rem 1rem;
   transition: box-shadow 0.2s;
 }
 
 .event-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.13);
 }
 
 .event-title {
@@ -450,7 +454,7 @@
 }
 
 .event-edit:focus {
-  border-bottom: 1px solid #007AFF;
+  border-bottom: 1px solid #007aff;
   background: #f5faff;
 }
 
@@ -468,4 +472,4 @@
   border-radius: 8px;
   overflow: hidden;
   margin-top: 1rem;
-} 
+}

@@ -1,4 +1,16 @@
-import { collection, addDoc, getDocs, query, orderBy, updateDoc, doc, arrayUnion, arrayRemove, deleteDoc } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy,
+  updateDoc,
+  doc,
+  arrayUnion,
+  arrayRemove,
+  deleteDoc,
+} from 'firebase/firestore';
+
 import { db } from '../config/firebase';
 import { Event } from '../types/event';
 
@@ -14,20 +26,20 @@ export const addEvent = async (event: Omit<Event, 'id'>) => {
 export const getEvents = async (): Promise<Event[]> => {
   const q = query(collection(db, 'events'), orderBy('createdAt', 'desc'));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Event);
 };
 
 export const joinEvent = async (eventId: string, userId: string) => {
   const eventRef = doc(db, 'events', eventId);
   await updateDoc(eventRef, {
-    participantsList: arrayUnion(userId)
+    participantsList: arrayUnion(userId),
   });
 };
 
 export const leaveEvent = async (eventId: string, userId: string) => {
   const eventRef = doc(db, 'events', eventId);
   await updateDoc(eventRef, {
-    participantsList: arrayRemove(userId)
+    participantsList: arrayRemove(userId),
   });
 };
 
@@ -39,4 +51,4 @@ export const deleteEvent = async (eventId: string) => {
 export const updateEvent = async (eventId: string, data: Partial<Event>) => {
   const eventRef = doc(db, 'events', eventId);
   await updateDoc(eventRef, data);
-}; 
+};

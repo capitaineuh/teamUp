@@ -9,4 +9,4 @@ export interface Event {
   required_participants: number;
   creatorId: string;
   createdAt: string;
-} 
+}

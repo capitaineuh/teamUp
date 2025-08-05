@@ -1,9 +1,10 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+
+import CreateEventScreen from './screens/CreateEventScreen';
 import HomeScreen from './screens/HomeScreen';
 import ProfileScreen from './screens/ProfileScreen';
-import CreateEventScreen from './screens/CreateEventScreen';
 import './App.css';
 
 // Importez vos composants ici
@@ -14,10 +15,10 @@ function App() {
   const location = useLocation();
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode='wait'>
       <Routes location={location} key={location.pathname}>
         <Route
-          path="/"
+          path='/'
           element={
             <motion.div
               initial={{ opacity: 0, x: 100 }}
@@ -31,7 +32,7 @@ function App() {
           }
         />
         <Route
-          path="/profile"
+          path='/profile'
           element={
             <motion.div
               initial={{ opacity: 0, x: 100 }}
@@ -45,7 +46,7 @@ function App() {
           }
         />
         <Route
-          path="/create-event"
+          path='/create-event'
           element={
             <motion.div
               initial={{ opacity: 0, x: 100 }}
@@ -63,4 +64,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;

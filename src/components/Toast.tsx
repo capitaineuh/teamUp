@@ -24,10 +24,10 @@ const Toast: React.FC<ToastProps> = ({ message, visible, onHide }) => {
   if (!visible) return null;
 
   return (
-    <div className="toast" style={{ opacity: opacity.current }}>
-      <p className="toast-message">{message}</p>
+    <div className='toast' style={{ opacity: opacity.current }}>
+      <p className='toast-message'>{message}</p>
     </div>
   );
 };
 
-export default Toast; 
+export default Toast;

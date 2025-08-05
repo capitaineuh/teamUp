@@ -1,4 +1,5 @@
 /// <reference lib="webworker" />
+/* global ServiceWorkerGlobalScope */
 
 import { clientsClaim } from 'workbox-core';
 import { ExpirationPlugin } from 'workbox-expiration';
@@ -29,16 +30,32 @@ registerRoute(
   createHandlerBoundToURL(process.env.PUBLIC_URL + '/index.html')
 );
 
+// Ignorer les requêtes Firebase Auth pour éviter les problèmes de référent
 registerRoute(
-  ({ url }) => url.origin === self.location.origin && url.pathname.endsWith('.png'),
+  ({ url }) => {
+    return (
+      url.hostname.includes('firebaseapp.com') ||
+      url.hostname.includes('googleapis.com') ||
+      url.hostname.includes('identitytoolkit.googleapis.com')
+    );
+  },
+  new StaleWhileRevalidate({
+    cacheName: 'firebase-auth',
+    plugins: [new ExpirationPlugin({ maxEntries: 10 })],
+  })
+);
+
+registerRoute(
+  ({ url }) =>
+    url.origin === self.location.origin && url.pathname.endsWith('.png'),
   new StaleWhileRevalidate({
     cacheName: 'images',
     plugins: [new ExpirationPlugin({ maxEntries: 50 })],
   })
 );
 
-self.addEventListener('message', (event) => {
+self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-}); 
+});
