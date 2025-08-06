@@ -1,0 +1,144 @@
+.preferences-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.preferences-modal {
+  width: 100%;
+  max-width: 400px;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.preferences-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.preferences-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #666;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.preferences-content {
+  padding: 1rem 1.5rem 1.5rem;
+}
+
+.preference-section {
+  margin-bottom: 1.5rem;
+}
+
+.preference-section:last-child {
+  margin-bottom: 0;
+}
+
+.preference-section h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.preference-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.preference-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.status-indicator {
+  font-weight: 500;
+}
+
+.preference-button {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.preference-button:hover:not(:disabled) {
+  background-color: #f5f5f5;
+  border-color: #d0d0d0;
+}
+
+.preference-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.preference-button.primary {
+  background-color: #007aff;
+  color: white;
+  border-color: #007aff;
+}
+
+.preference-button.primary:hover:not(:disabled) {
+  background-color: #0056cc;
+  border-color: #0056cc;
+}
+
+/* Media queries pour mobile */
+@media (max-width: 480px) {
+  .preferences-modal {
+    max-width: 100%;
+    margin: 0 0.5rem;
+  }
+
+  .preferences-header {
+    padding: 1rem 1rem 0.75rem;
+  }
+
+  .preferences-content {
+    padding: 0.75rem 1rem 1rem;
+  }
+
+  .preference-section {
+    margin-bottom: 1.25rem;
+  }
+}

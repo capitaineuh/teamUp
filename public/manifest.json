@@ -1,6 +1,7 @@
 {
   "short_name": "TeamUp",
-  "name": "TeamUp App Web",
+  "name": "TeamUp - Gestion d'événements sportifs",
+  "description": "Application de gestion d'événements sportifs",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,16 +11,49 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
-} 
+  "orientation": "portrait",
+  "theme_color": "#9DD9D2",
+  "background_color": "#ffffff",
+  "scope": "/",
+  "lang": "fr",
+  "categories": ["sports", "lifestyle", "social"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Créer un événement",
+      "short_name": "Créer",
+      "description": "Créer un nouvel événement sportif",
+      "url": "/create-event",
+      "icons": [
+        {
+          "src": "logo192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Mes événements",
+      "short_name": "Mes événements",
+      "description": "Voir mes événements",
+      "url": "/profile",
+      "icons": [
+        {
+          "src": "logo192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

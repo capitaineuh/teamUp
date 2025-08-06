@@ -1,38 +1,25 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 
 import Map from '../components/Map';
+import PreferencesModal from '../components/PreferencesModal';
 import { GOOGLE_MAPS_API_KEY } from '../config/maps';
 import { useAuth } from '../hooks/useAuth';
 import {
   getEvents,
   joinEvent,
   leaveEvent,
-  deleteEvent,
-  updateEvent,
 } from '../services/events';
 import './HomeScreen.css';
 
 const HomeScreen = () => {
-  const navigate = useNavigate();
   const [isAuthModalVisible, setIsAuthModalVisible] = useState(false);
+  const [isPreferencesModalVisible, setIsPreferencesModalVisible] = useState(false);
   const { user, loading, error, signInWithGoogle, logout } = useAuth();
   const [events, setEvents] = useState<any[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [leavingId, setLeavingId] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<any>({});
-  const [savingEdit, setSavingEdit] = useState(false);
-
-  const titreRef = useRef<HTMLSpanElement>(null);
-  const sportRef = useRef<HTMLSpanElement>(null);
-  const niveauRef = useRef<HTMLSpanElement>(null);
-  const participantsRef = useRef<HTMLSpanElement>(null);
-  const lieuRef = useRef<HTMLSpanElement>(null);
-  const descriptionRef = useRef<HTMLSpanElement>(null);
 
   const handleAuth = async () => {
     if (user) {
@@ -59,21 +46,7 @@ const HomeScreen = () => {
     fetchEvents();
   }, []);
 
-  useEffect(() => {
-    if (editingId) {
-      if (titreRef.current) titreRef.current.innerText = editForm.titre || '';
-      if (sportRef.current) sportRef.current.innerText = editForm.sport || '';
-      if (niveauRef.current)
-        niveauRef.current.innerText = editForm.niveau || '';
-      if (participantsRef.current)
-        participantsRef.current.innerText = String(
-          editForm.required_participants ?? ''
-        );
-      if (lieuRef.current) lieuRef.current.innerText = editForm.lieu || '';
-      if (descriptionRef.current)
-        descriptionRef.current.innerText = editForm.description || '';
-    }
-  }, [editingId, editForm]);
+
 
   const handleJoin = async (eventId: string) => {
     if (!user) return;
@@ -89,56 +62,6 @@ const HomeScreen = () => {
     await leaveEvent(eventId, user.uid);
     await fetchEvents();
     setLeavingId(null);
-  };
-
-  const handleDelete = async (eventId: string) => {
-    if (!user) return;
-    setDeletingId(eventId);
-    await deleteEvent(eventId);
-    await fetchEvents();
-    setDeletingId(null);
-  };
-
-  const handleEdit = (event: any) => {
-    setEditingId(event.id);
-    setEditForm({
-      titre: event.titre,
-      sport: event.sport,
-      niveau: event.niveau,
-      required_participants: event.required_participants,
-      lieu: event.lieu,
-      description: event.description,
-    });
-  };
-
-  const handleEditCancel = () => {
-    setEditingId(null);
-    setEditForm({});
-  };
-
-  const handleEditSave = async (eventId: string) => {
-    setSavingEdit(true);
-    await updateEvent(eventId, editForm);
-    await fetchEvents();
-    setEditingId(null);
-    setEditForm({});
-    setSavingEdit(false);
-  };
-
-  const handleEditChange = (field: string, value: string) => {
-    setEditForm(
-      (prev: {
-        titre: string;
-        sport: string;
-        niveau: string;
-        required_participants: number;
-        lieu: string;
-        description: string;
-      }) => ({
-        ...prev,
-        [field]: field === 'required_participants' ? Number(value) : value,
-      })
-    );
   };
 
   const containerVariants = {
@@ -178,96 +101,48 @@ const HomeScreen = () => {
         animate={{ y: 0 }}
         transition={{ type: 'spring', stiffness: 100 }}
       >
-        <motion.h1
-          className='header-title'
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          TeamUp
-        </motion.h1>
-        <div className='header-buttons'>
-          {user && (
-            <motion.button
-              className='profile-button'
-              onClick={() => navigate('/profile')}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Mon Profil
-            </motion.button>
-          )}
-          <motion.button
-            className='auth-button'
-            onClick={() => (user ? handleAuth() : setIsAuthModalVisible(true))}
+        <div className='header-content'>
+          <motion.h1
+            className='header-title'
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            {user ? 'Déconnexion' : 'Connexion'}
+            Prochains Événements
+          </motion.h1>
+          <motion.button
+            className='filter-button'
+            onClick={() => setIsPreferencesModalVisible(true)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M3 6H21M6 12H18M9 18H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
           </motion.button>
+        </div>
+
+        <div className='search-section'>
+          <div className='search-bar'>
+            <svg className='search-icon' width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <input
+              type="text"
+              placeholder="Rechercher des événements"
+              className='search-input'
+            />
+          </div>
+
+          <div className='filter-buttons'>
+            <button className='filter-btn active'>Tous</button>
+            <button className='filter-btn'>Distance</button>
+            <button className='filter-btn'>Date</button>
+          </div>
         </div>
       </motion.header>
 
       <main className='content'>
-        <motion.section
-          className='welcome-section'
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <motion.h2
-            className='welcome-title'
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            Bienvenue sur TeamUp
-          </motion.h2>
-          <motion.p
-            className='welcome-text'
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            La plateforme qui simplifie l&apos;organisation de vos événements
-            sportifs
-          </motion.p>
-        </motion.section>
 
-        <section className='features-section'>
-          <motion.h2 className='section-title' variants={itemVariants}>
-            Nos fonctionnalités
-          </motion.h2>
-          <div className='features-grid'>
-            <motion.div
-              className='feature-card clickable'
-              variants={itemVariants}
-              whileHover={{
-                scale: 1.05,
-                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-              }}
-              onClick={() => navigate('/create-event')}
-              style={{ cursor: 'pointer' }}
-            >
-              <h3 className='feature-title'>Créer des événements</h3>
-              <p className='feature-text'>
-                Organisez facilement vos matchs et tournois
-              </p>
-            </motion.div>
-            <motion.div
-              className='feature-card'
-              variants={itemVariants}
-              whileHover={{
-                scale: 1.05,
-                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-              }}
-            >
-              <h3 className='feature-title'>Gérer les équipes</h3>
-              <p className='feature-text'>
-                Composez vos équipes et suivez les performances
-              </p>
-            </motion.div>
-          </div>
-        </section>
 
         <section className='map-section'>
           <motion.h2 className='section-title' variants={itemVariants}>
@@ -285,7 +160,7 @@ const HomeScreen = () => {
         </section>
 
         <section className='events-section'>
-          <h2 className='events-title'>Événements sportifs</h2>
+          <h2 className='events-title'>Liste des événements</h2>
           {loadingEvents ? (
             <div className='loading'>Chargement des événements...</div>
           ) : events.length === 0 ? (
@@ -300,202 +175,56 @@ const HomeScreen = () => {
                   user &&
                   Array.isArray(event.participantsList) &&
                   event.participantsList.includes(user.uid);
-                const isCreator = user && event.creatorId === user.uid;
-                const isEditing = editingId === event.id;
                 return (
                   <div className='event-card' key={event.id}>
-                    <h3 className='event-title'>
-                      {isEditing ? (
-                        <span
-                          contentEditable
-                          suppressContentEditableWarning
-                          ref={titreRef}
-                          onInput={e =>
-                            handleEditChange('titre', e.currentTarget.innerText)
-                          }
-                          style={{ outline: 'none' }}
-                        />
-                      ) : (
-                        event.titre
-                      )}
-                    </h3>
+                    <h3 className='event-title'>{event.titre}</h3>
                     <div className='event-meta'>
                       <span>
-                        <b>Sport :</b>{' '}
-                        {isEditing ? (
-                          <span
-                            contentEditable
-                            suppressContentEditableWarning
-                            ref={sportRef}
-                            onInput={e =>
-                              handleEditChange(
-                                'sport',
-                                e.currentTarget.innerText
-                              )
-                            }
-                            style={{ outline: 'none' }}
-                          />
-                        ) : (
-                          event.sport
-                        )}
+                        <b>Sport :</b> {event.sport}
                       </span>
                       {' | '}
                       <span>
-                        <b>Niveau :</b>{' '}
-                        {isEditing ? (
-                          <span
-                            contentEditable
-                            suppressContentEditableWarning
-                            ref={niveauRef}
-                            onInput={e =>
-                              handleEditChange(
-                                'niveau',
-                                e.currentTarget.innerText
-                              )
-                            }
-                            style={{ outline: 'none' }}
-                          />
-                        ) : (
-                          event.niveau
-                        )}
+                        <b>Niveau :</b> {event.niveau}
                       </span>
                       {' | '}
                       <span>
-                        <b>Participants :</b>{' '}
-                        {isEditing ? (
-                          <span
-                            contentEditable
-                            suppressContentEditableWarning
-                            ref={participantsRef}
-                            onInput={e =>
-                              handleEditChange(
-                                'required_participants',
-                                e.currentTarget.innerText
-                              )
-                            }
-                            style={{
-                              outline: 'none',
-                              minWidth: 30,
-                              display: 'inline-block',
-                            }}
-                          />
-                        ) : (
-                          `${nbInscrits} / ${event.required_participants}`
-                        )}
+                        <b>Participants :</b> {`${nbInscrits} / ${event.required_participants}`}
                       </span>
                     </div>
                     <div className='event-meta'>
                       <span>
-                        <b>Lieu :</b>{' '}
-                        {isEditing ? (
-                          <span
-                            contentEditable
-                            suppressContentEditableWarning
-                            ref={lieuRef}
-                            onInput={e =>
-                              handleEditChange(
-                                'lieu',
-                                e.currentTarget.innerText
-                              )
-                            }
-                            style={{ outline: 'none' }}
-                          />
-                        ) : (
-                          event.lieu
-                        )}
+                        <b>Lieu :</b> {event.lieu}
                       </span>
                     </div>
-                    <p className='event-description'>
-                      {isEditing ? (
-                        <span
-                          contentEditable
-                          suppressContentEditableWarning
-                          ref={descriptionRef}
-                          onInput={e =>
-                            handleEditChange(
-                              'description',
-                              e.currentTarget.innerText
-                            )
-                          }
-                          style={{
-                            outline: 'none',
-                            display: 'block',
-                            marginTop: 4,
-                          }}
-                        />
-                      ) : (
-                        event.description
-                      )}
-                    </p>
+                    <p className='event-description'>{event.description}</p>
                     <div className='event-actions'>
-                      {isEditing ? (
+                      {user && (
                         <>
-                          <button
-                            className='event-action-btn join-btn'
-                            onClick={() => handleEditSave(event.id)}
-                            disabled={savingEdit}
-                          >
-                            {savingEdit ? 'Enregistrement...' : 'Enregistrer'}
-                          </button>
-                          <button
-                            className='event-action-btn leave-btn'
-                            onClick={handleEditCancel}
-                            disabled={savingEdit}
-                          >
-                            Annuler
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          {user && (
-                            <>
-                              {dejaInscrit ? (
-                                <button
-                                  className='event-action-btn leave-btn'
-                                  onClick={() => handleLeave(event.id)}
-                                  disabled={leavingId === event.id}
-                                >
-                                  {leavingId === event.id
-                                    ? 'Désinscription...'
-                                    : 'Se désinscrire'}
-                                </button>
-                              ) : (
-                                <button
-                                  className='event-action-btn join-btn'
-                                  onClick={() => handleJoin(event.id)}
-                                  disabled={
-                                    joiningId === event.id ||
-                                    nbInscrits >= event.required_participants
-                                  }
-                                >
-                                  {joiningId === event.id
-                                    ? 'Inscription...'
-                                    : nbInscrits >= event.required_participants
-                                      ? 'Complet'
-                                      : "S'inscrire"}
-                                </button>
-                              )}
-                              {isCreator && (
-                                <>
-                                  <button
-                                    className='event-action-btn edit-btn'
-                                    onClick={() => handleEdit(event)}
-                                    disabled={editingId !== null}
-                                  >
-                                    Modifier
-                                  </button>
-                                  <button
-                                    className='event-action-btn delete-btn'
-                                    onClick={() => handleDelete(event.id)}
-                                    disabled={deletingId === event.id}
-                                  >
-                                    {deletingId === event.id
-                                      ? 'Suppression...'
-                                      : 'Supprimer'}
-                                  </button>
-                                </>
-                              )}
-                            </>
+                          {dejaInscrit ? (
+                            <button
+                              className='event-action-btn leave-btn'
+                              onClick={() => handleLeave(event.id)}
+                              disabled={leavingId === event.id}
+                            >
+                              {leavingId === event.id
+                                ? 'Désinscription...'
+                                : 'Se désinscrire'}
+                            </button>
+                          ) : (
+                            <button
+                              className='event-action-btn join-btn'
+                              onClick={() => handleJoin(event.id)}
+                              disabled={
+                                joiningId === event.id ||
+                                nbInscrits >= event.required_participants
+                              }
+                            >
+                              {joiningId === event.id
+                                ? 'Inscription...'
+                                : nbInscrits >= event.required_participants
+                                  ? 'Complet'
+                                  : "S'inscrire"}
+                            </button>
                           )}
                         </>
                       )}
@@ -558,6 +287,11 @@ const HomeScreen = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <PreferencesModal
+        isOpen={isPreferencesModalVisible}
+        onClose={() => setIsPreferencesModalVisible(false)}
+      />
     </motion.div>
   );
 };
