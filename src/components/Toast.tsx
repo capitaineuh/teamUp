@@ -19,16 +19,23 @@ const Toast: React.FC<ToastProps> = ({
   const [opacity, setOpacity] = useState(0);
 
   useEffect(() => {
-    if (visible) {
-      setOpacity(1);
-      const timer = setTimeout(() => {
-        setOpacity(0);
-        const hideTimer = setTimeout(onHide, 300);
-        return () => clearTimeout(hideTimer);
-      }, duration);
-      return () => clearTimeout(timer);
-    }
-  }, [visible, onHide]);
+    if (!visible) return;
+
+    setOpacity(1);
+
+    const fadeTimer = window.setTimeout(() => {
+      setOpacity(0);
+    }, duration);
+
+    const hideTimer = window.setTimeout(() => {
+      onHide();
+    }, duration + 300);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(hideTimer);
+    };
+  }, [visible, onHide, duration]);
 
   if (!visible) return null;
 
