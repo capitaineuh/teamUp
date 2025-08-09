@@ -49,7 +49,7 @@ export const useOfflineSync = () => {
       // Vider les actions en attente
       setPendingActions([]);
     } catch (error) {
-      console.error('Erreur lors de la synchronisation:', error);
+      // Erreur lors de la synchronisation
     } finally {
       setIsSyncing(false);
     }

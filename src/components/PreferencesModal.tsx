@@ -25,8 +25,8 @@ const PreferencesModal: React.FC<PreferencesModalProps> = ({ isOpen, onClose }) 
 
     const requestLocationPermission = async () => {
     try {
-      const position = await new Promise<any>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
+      await new Promise<void>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(() => resolve(), reject, {
           enableHighAccuracy: true,
           timeout: 10000,
           maximumAge: 60000,
@@ -34,10 +34,10 @@ const PreferencesModal: React.FC<PreferencesModalProps> = ({ isOpen, onClose }) 
       });
 
       setLocationPermission('granted');
-      console.log('Position obtenue:', position.coords);
+      // Position obtenue
     } catch (error) {
       setLocationPermission('denied');
-      console.error('Erreur de géolocalisation:', error);
+      // Erreur de géolocalisation
     }
   };
 
@@ -50,7 +50,7 @@ const PreferencesModal: React.FC<PreferencesModalProps> = ({ isOpen, onClose }) 
     if (isInstallable) {
       const success = await installPWA();
       if (success) {
-        console.log('PWA installée avec succès');
+        // PWA installée avec succès
       }
     } else {
       // Fallback : ouvrir dans un nouvel onglet
@@ -153,7 +153,7 @@ const PreferencesModal: React.FC<PreferencesModalProps> = ({ isOpen, onClose }) 
                   onClick={downloadPWA}
                   disabled={!isInstallable}
                 >
-                  {isInstallable ? 'Installer l&apos;app' : 'Non disponible'}
+                  {isInstallable ? 'Installer l\'app' : 'Non disponible'}
                 </button>
               </div>
           </div>

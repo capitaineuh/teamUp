@@ -3,9 +3,9 @@
 
 import { clientsClaim } from 'workbox-core';
 import { ExpirationPlugin } from 'workbox-expiration';
-import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
+import { precacheAndRoute } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
-import { StaleWhileRevalidate, NetworkFirst, CacheFirst } from 'workbox-strategies';
+import { NetworkFirst, CacheFirst } from 'workbox-strategies';
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -160,13 +160,14 @@ async function syncOfflineActions(): Promise<void> {
         },
       });
 
-      if (response.ok) {
-        // Supprimer l'action du cache si elle a réussi
-        const updatedActions = offlineActions.filter(a => a.id !== action.id);
-        await setOfflineActions(updatedActions);
-      }
+              if (response.ok) {
+          // Supprimer l'action du cache si elle a réussi
+          const updatedActions = offlineActions.filter(a => a.id !== action.id);
+          await setOfflineActions(updatedActions);
+          return;
+        }
     } catch (error) {
-      console.error('Erreur lors de la synchronisation:', error);
+      // Erreur lors de la synchronisation
     }
   }
 }
@@ -199,6 +200,7 @@ self.addEventListener('activate', (event) => {
             if (![EVENTS_CACHE, USER_DATA_CACHE, OFFLINE_ACTIONS_CACHE, 'static-assets', 'map-tiles'].includes(cacheName)) {
               return caches.delete(cacheName);
             }
+            return Promise.resolve(false);
           })
         );
       }),
@@ -208,9 +210,9 @@ self.addEventListener('activate', (event) => {
 
 // Gestion des erreurs
 self.addEventListener('error', (event) => {
-  console.error('Service Worker Error:', event.error);
+      // Service Worker Error
 });
 
-self.addEventListener('unhandledrejection', (event) => {
-  console.error('Service Worker Unhandled Rejection:', event.reason);
-});
+  self.addEventListener('unhandledrejection', (event) => {
+    // Service Worker Unhandled Rejection
+  });

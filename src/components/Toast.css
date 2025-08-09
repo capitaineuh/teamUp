@@ -13,6 +13,10 @@
   transition: opacity 0.3s ease;
 }
 
+.toast.error {
+  background-color: #dc3545;
+}
+
 .toast-message {
   margin: 0;
   font-size: 16px;

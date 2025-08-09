@@ -8,28 +8,7 @@ import { useProfile } from '../hooks/useProfile';
 import { UserProfile } from '../types/user';
 import './ProfileScreen.css';
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      when: 'beforeChildren',
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: 'spring',
-      stiffness: 100,
-    },
-  },
-};
+// Animations de micro-interaction uniquement, pas utilisées pour le layout
 
 const initialFormData: UserProfile = {
   displayName: '',
@@ -58,10 +37,16 @@ const ProfileScreen: React.FC = () => {
 
   useEffect(() => {
     if (profile) {
+      // Assurer une clé stable pour chaque sport
+      const sportsWithIds = (profile.sports || []).map((s, idx) => ({
+        id: s.id || `${idx}-${s.name || 'sport'}`,
+        name: s.name || '',
+        level: s.level || 'débutant',
+      }));
       setFormData({
         displayName: profile.displayName || '',
         email: profile.email || '',
-        sports: profile.sports || [],
+        sports: sportsWithIds,
       });
     }
   }, [profile]);
@@ -95,7 +80,10 @@ const ProfileScreen: React.FC = () => {
   const addSport = () => {
     setFormData(prev => ({
       ...prev,
-      sports: [...prev.sports, { name: '', level: 'débutant' }],
+      sports: [
+        ...prev.sports,
+        { id: `${Date.now()}-${prev.sports.length}`, name: '', level: 'débutant' },
+      ],
     }));
   };
 
@@ -149,19 +137,8 @@ const ProfileScreen: React.FC = () => {
   }
 
   return (
-    <motion.div
-      className='profile-screen'
-      key={user?.uid || 'profile'}
-      initial='hidden'
-      animate='visible'
-      variants={containerVariants}
-    >
-      <motion.div
-        className='profile-header'
-        variants={itemVariants}
-        initial='hidden'
-        animate='visible'
-      >
+    <div className='profile-screen' key={user?.uid || 'profile'}>
+      <div className='profile-header'>
         <motion.button
           className='back-button'
           onClick={() => navigate('/')}
@@ -170,21 +147,36 @@ const ProfileScreen: React.FC = () => {
         >
           ← Retour
         </motion.button>
-        <motion.h1 variants={itemVariants}>Mon Profil</motion.h1>
-      </motion.div>
+        <h1>Mon Profil</h1>
+      </div>
 
-      <motion.form
-        className='profile-container'
-        onSubmit={handleSubmit}
-        variants={itemVariants}
-        initial='hidden'
-        animate='visible'
-      >
-        <motion.div className='profile-section' variants={itemVariants}>
+      {/* En-tête visuel avec avatar / nom / email */}
+      <div className='profile-hero'>
+        <div className='avatar'>
+          {(formData.displayName || user?.displayName || 'U')
+            .split(' ')
+            .map(part => part.charAt(0))
+            .slice(0, 2)
+            .join('')
+            .toUpperCase()}
+        </div>
+        <div className='hero-texts'>
+          <h2 className='profile-name'>
+            {formData.displayName || user?.displayName || 'Utilisateur'}
+          </h2>
+          {(formData.email || user?.email) && (
+            <p className='profile-email'>{formData.email || user?.email}</p>
+          )}
+        </div>
+      </div>
+
+      <form className='profile-container' onSubmit={handleSubmit}>
+        <div className='profile-section'>
           <h2>Informations personnelles</h2>
           <div className='form-group'>
             <label htmlFor='displayName'>Nom d&apos;affichage</label>
             <motion.input
+              layout={false}
               whileFocus={{ scale: 1.02 }}
               type='text'
               id='displayName'
@@ -197,6 +189,7 @@ const ProfileScreen: React.FC = () => {
           <div className='form-group'>
             <label htmlFor='email'>Email</label>
             <motion.input
+              layout={false}
               whileFocus={{ scale: 1.02 }}
               type='email'
               id='email'
@@ -206,14 +199,14 @@ const ProfileScreen: React.FC = () => {
               required
             />
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div className='profile-section' variants={itemVariants}>
+        <div className='profile-section'>
           <h2>Mes sports</h2>
           <AnimatePresence>
             {formData.sports.map((sport, index) => (
               <motion.div
-                key={`sport-${index}-${sport.name}`}
+                key={sport.id || `sport-${index}`}
                 className='sport-item'
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -223,6 +216,7 @@ const ProfileScreen: React.FC = () => {
                 <div className='form-group'>
                   <label htmlFor={`sport-${index}`}>Sport</label>
                   <motion.input
+                    layout={false}
                     whileFocus={{ scale: 1.02 }}
                     type='text'
                     id={`sport-${index}`}
@@ -236,6 +230,7 @@ const ProfileScreen: React.FC = () => {
                 <div className='form-group'>
                   <label htmlFor={`level-${index}`}>Niveau</label>
                   <motion.select
+                    layout={false}
                     whileFocus={{ scale: 1.02 }}
                     id={`level-${index}`}
                     value={sport.level}
@@ -272,7 +267,7 @@ const ProfileScreen: React.FC = () => {
           >
             + Ajouter un sport
           </motion.button>
-        </motion.div>
+        </div>
 
         <motion.button
           type='submit'
@@ -282,7 +277,7 @@ const ProfileScreen: React.FC = () => {
         >
           Enregistrer
         </motion.button>
-      </motion.form>
+      </form>
 
       <AnimatePresence>
         {showToast && (
@@ -290,10 +285,12 @@ const ProfileScreen: React.FC = () => {
             message={toastMessage}
             visible={showToast}
             onHide={() => setShowToast(false)}
+            type={toastMessage.toLowerCase().includes('erreur') ? 'error' : 'success'}
+            duration={3000}
           />
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 };
 

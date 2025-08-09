@@ -72,7 +72,7 @@ const Map: React.FC<MapProps> = ({ apiKey }) => {
           });
         },
         error => {
-          console.error('Erreur de géolocalisation:', error);
+          // Erreur de géolocalisation
         }
       );
     }
@@ -99,7 +99,7 @@ const Map: React.FC<MapProps> = ({ apiKey }) => {
 
         setMarkers(newMarkers);
       } catch (error) {
-        console.error('Erreur lors du chargement des événements:', error);
+        // Erreur lors du chargement des événements
       }
     };
 
