@@ -1,3 +1,9 @@
+:root {
+  --primary-orange: #ffb86b;
+  --primary-orange-hover: #ffa94d;
+  --primary-orange-shadow: rgba(255, 184, 107, 0.35);
+}
+
 .create-event-screen {
   max-width: 500px;
   margin: 2rem auto;
@@ -10,7 +16,7 @@
 .create-event-screen h1 {
   text-align: center;
   margin-bottom: 2rem;
-  color: #007aff;
+  color: var(--primary-orange);
 }
 
 .event-form .form-group {
@@ -42,7 +48,7 @@
 
 .submit-btn {
   width: 100%;
-  background: #007aff;
+  background: var(--primary-orange);
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -52,6 +58,10 @@
   cursor: pointer;
   margin-top: 1rem;
   transition: background 0.2s;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: var(--primary-orange-hover);
 }
 
 .submit-btn:disabled {

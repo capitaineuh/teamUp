@@ -1,3 +1,9 @@
+:root {
+  --primary-orange: #ffb86b;
+  --primary-orange-hover: #ffa94d;
+  --primary-orange-shadow: rgba(255, 184, 107, 0.35);
+}
+
 .bottom-navbar {
   position: fixed;
   bottom: 0;
@@ -32,7 +38,7 @@
 }
 
 .nav-item.active {
-  color: #007aff;
+  color: var(--primary-orange);
 }
 
 .nav-item.active .nav-icon {
@@ -62,7 +68,7 @@
 }
 
 .nav-item.active .nav-label {
-  color: #007aff;
+  color: var(--primary-orange);
   font-weight: 600;
 }
 
