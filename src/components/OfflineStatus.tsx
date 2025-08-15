@@ -21,6 +21,7 @@ const OfflineStatus: React.FC = () => {
         <span className="offline-status-icon">
           {status.status === 'offline' && '📡'}
           {status.status === 'syncing' && '🔄'}
+          {status.status === 'warning' && '⚠️'}
           {status.status === 'online' && '✅'}
         </span>
         <span className="offline-status-message">

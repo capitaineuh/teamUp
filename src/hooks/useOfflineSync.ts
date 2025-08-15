@@ -25,7 +25,9 @@ export const useOfflineSync = () => {
     }
   };
 
-          // Mettre à jour le nombre d'actions en attente
+
+
+  // Mettre à jour le nombre d'actions en attente
   const updatePendingActionsCount = useCallback(() => {
     if (!isAutoSyncEnabled || isSyncing) {
       return;
@@ -55,7 +57,31 @@ export const useOfflineSync = () => {
 
       return allActions;
     });
-  }, [isAutoSyncEnabled, isSyncing]);
+
+    // VÉRIFICATION SIMPLE : Nettoyage automatique si trop d'actions
+    const totalActions = pendingActions.length + eventActions.length;
+    if (totalActions > 100) {
+      console.warn(`🚨 NETTOYAGE AUTOMATIQUE - ${totalActions} actions détectées`);
+
+      // Désactiver temporairement l'auto-sync
+      setIsAutoSyncEnabled(false);
+
+      // Vider les actions en attente
+      setPendingActions([]);
+
+      // Nettoyer le localStorage
+      try {
+        localStorage.removeItem('teamup-offline-actions');
+      } catch (error) {
+        // Ignorer les erreurs de nettoyage
+      }
+
+      // Réactiver après 30 secondes
+      setTimeout(() => {
+        setIsAutoSyncEnabled(true);
+      }, 30000);
+    }
+  }, [isAutoSyncEnabled, isSyncing, pendingActions.length]);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -128,7 +154,7 @@ export const useOfflineSync = () => {
     }
   }, [isOnline, updatePendingActionsCount, isAutoSyncEnabled]);
 
-      const getOfflineStatus = () => {
+        const getOfflineStatus = () => {
     if (!isAutoSyncEnabled) {
       const eventActions = getEventOfflineActions();
       const totalPendingActions = pendingActions.length + eventActions.length;
@@ -142,6 +168,15 @@ export const useOfflineSync = () => {
 
     const eventActions = getEventOfflineActions();
     const totalPendingActions = pendingActions.length + eventActions.length;
+
+    // AVERTISSEMENT si trop d'actions (risque de bombardement de la base)
+    if (totalPendingActions > 50) {
+      return {
+        status: 'warning',
+        message: `⚠️ Beaucoup d'actions en attente (${totalPendingActions}) - Nettoyage automatique en cours...`,
+        color: '#FF6B6B'
+      };
+    }
 
     if (!isOnline) {
       return {
