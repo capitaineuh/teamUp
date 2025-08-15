@@ -5,10 +5,12 @@ import Map from '../components/Map';
 import PreferencesModal from '../components/PreferencesModal';
 import { GOOGLE_MAPS_API_KEY } from '../config/maps';
 import { useAuth } from '../hooks/useAuth';
+import { useOfflineSync } from '../hooks/useOfflineSync';
 import {
   getEvents,
   joinEvent,
   leaveEvent,
+  getPendingOfflineActions,
 } from '../services/events';
 import './HomeScreen.css';
 
@@ -16,10 +18,12 @@ const HomeScreen = () => {
   const [isAuthModalVisible, setIsAuthModalVisible] = useState(false);
   const [isPreferencesModalVisible, setIsPreferencesModalVisible] = useState(false);
   const { user, loading, error, signInWithGoogle, logout } = useAuth();
+  const { isOnline } = useOfflineSync();
   const [events, setEvents] = useState<any[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [leavingId, setLeavingId] = useState<string | null>(null);
+  const [offlineActions, setOfflineActions] = useState<any[]>([]);
 
   const handleAuth = async () => {
     if (user) {
@@ -46,22 +50,85 @@ const HomeScreen = () => {
     fetchEvents();
   }, []);
 
+  // Récupérer les actions offline
+  useEffect(() => {
+    const loadOfflineActions = () => {
+      try {
+        const actions = getPendingOfflineActions();
+        setOfflineActions(actions);
+      } catch (error) {
+        // Erreur lors du chargement des actions offline
+      }
+    };
+
+    loadOfflineActions();
+
+    // Mettre à jour toutes les 3 secondes
+    const interval = setInterval(loadOfflineActions, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
 
 
   const handleJoin = async (eventId: string) => {
     if (!user) return;
     setJoiningId(eventId);
-    await joinEvent(eventId, user.uid);
-    await fetchEvents();
-    setJoiningId(null);
+
+    try {
+      await joinEvent(eventId, user.uid);
+
+      // Si on est offline, mettre à jour l'état local immédiatement
+      if (!isOnline) {
+        setEvents(prevEvents =>
+          prevEvents.map(event =>
+            event.id === eventId
+              ? { ...event, participantsList: [...(event.participantsList || []), user.uid] }
+              : event
+          )
+        );
+        // Mettre à jour les actions offline
+        const actions = getPendingOfflineActions();
+        setOfflineActions(actions);
+      } else {
+        // Si on est en ligne, rafraîchir depuis le serveur
+        await fetchEvents();
+      }
+    } catch (error) {
+      // Erreur lors de l'inscription
+    } finally {
+      setJoiningId(null);
+    }
   };
 
   const handleLeave = async (eventId: string) => {
     if (!user) return;
     setLeavingId(eventId);
-    await leaveEvent(eventId, user.uid);
-    await fetchEvents();
-    setLeavingId(null);
+
+    try {
+      await leaveEvent(eventId, user.uid);
+
+      // Si on est offline, mettre à jour l'état local immédiatement
+      if (!isOnline) {
+        setEvents(prevEvents =>
+          prevEvents.map(event =>
+            event.id === eventId
+              ? { ...event, participantsList: (event.participantsList || []).filter((id: string) => id !== user.uid) }
+              : event
+          )
+        );
+        // Mettre à jour les actions offline
+        const actions = getPendingOfflineActions();
+        setOfflineActions(actions);
+      } else {
+        // Si on est en ligne, rafraîchir depuis le serveur
+        await fetchEvents();
+      }
+    } catch (error) {
+      // Erreur lors de la désinscription
+    } finally {
+      setLeavingId(null);
+    }
   };
 
   const containerVariants = {
@@ -225,6 +292,18 @@ const HomeScreen = () => {
                                   ? 'Complet'
                                   : "S'inscrire"}
                             </button>
+                          )}
+
+                          {/* Indicateur d'action en attente */}
+                          {offlineActions.some(action =>
+                            (action.type === 'join' || action.type === 'leave') &&
+                            action.eventId === event.id &&
+                            action.userId === user.uid
+                          ) && (
+                            <div className='offline-indicator'>
+                              <span className='offline-icon'>📱</span>
+                              <span className='offline-text'>En attente de synchronisation</span>
+                            </div>
                           )}
                         </>
                       )}
