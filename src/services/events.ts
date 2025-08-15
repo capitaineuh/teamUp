@@ -21,6 +21,7 @@ interface OfflineEventAction {
   userId?: string;
   eventData?: any;
   timestamp: number;
+  attempts?: number; // Nombre de tentatives de synchronisation
 }
 
 // Stockage local des actions offline
@@ -46,12 +47,18 @@ const saveOfflineActions = (actions: OfflineEventAction[]): void => {
 };
 
 // Ajouter une action offline
-const addOfflineAction = (action: Omit<OfflineEventAction, 'timestamp'>): void => {
+const addOfflineAction = (action: Omit<OfflineEventAction, 'timestamp' | 'attempts'>): void => {
+  if (!action.type || (!action.eventId && action.type !== 'create')) {
+    return;
+  }
+
   const actions = getOfflineActions();
   const newAction: OfflineEventAction = {
     ...action,
     timestamp: Date.now(),
+    attempts: 0,
   };
+
   actions.push(newAction);
   saveOfflineActions(actions);
 };
@@ -62,32 +69,35 @@ const isOnline = (): boolean => {
 };
 
 export const addEvent = async (event: Omit<Event, 'id'>) => {
-  if (!isOnline()) {
-    // Stocker l'action offline
+  // Vérifier si on est vraiment offline
+  if (!navigator.onLine) {
     addOfflineAction({
       type: 'create',
       eventData: event,
     });
-
-    // Retourner une promesse résolue pour simuler le succès
     return Promise.resolve();
   }
 
   try {
-    await addDoc(collection(db, 'events'), {
+    const docRef = await addDoc(collection(db, 'events'), {
       ...event,
       required_participants: event.required_participants,
       participantsList: event.participantsList || [],
       creatorId: event.creatorId,
     });
-  } catch (error) {
-    // En cas d'échec, stocker aussi en offline
-    addOfflineAction({
-      type: 'create',
-      eventData: event,
-    });
-    throw error;
-  }
+
+    // Retourner l'ID du document créé
+    return docRef.id;
+        } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('unavailable') || errorMessage.includes('network') || !navigator.onLine) {
+        addOfflineAction({
+          type: 'create',
+          eventData: event,
+        });
+      }
+      throw error;
+    }
 };
 
 export const getEvents = async (): Promise<Event[]> => {
@@ -120,7 +130,7 @@ export const joinEvent = async (eventId: string, userId: string) => {
       participantsList: arrayUnion(userId),
     });
   } catch (error) {
-    // En cas d'échec, stocker aussi en offline
+    // En cas d'échec, stocker en offline
     addOfflineAction({
       type: 'join',
       eventId,
@@ -149,7 +159,7 @@ export const leaveEvent = async (eventId: string, userId: string) => {
       participantsList: arrayRemove(userId),
     });
   } catch (error) {
-    // En cas d'échec, stocker aussi en offline
+    // En cas d'échec, stocker en offline
     addOfflineAction({
       type: 'leave',
       eventId,
@@ -217,61 +227,126 @@ export const syncOfflineActions = async (): Promise<void> => {
 
   if (actions.length === 0) return;
 
-  const successfulActions: string[] = [];
+  // NETTOYAGE AUTOMATIQUE : Supprimer les actions corrompues ou trop anciennes
+  const validActions = actions.filter(action => {
+    if (!action.type || (!action.eventId && action.type !== 'create')) {
+      return false;
+    }
 
-  for (const action of actions) {
+    const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+    if (action.timestamp < oneDayAgo) {
+      return false;
+    }
+
+    return true;
+  });
+
+  if (validActions.length !== actions.length) {
+    saveOfflineActions(validActions);
+  }
+
+  const successfulActions: string[] = [];
+  const MAX_ATTEMPTS = 2; // Réduire à 2 tentatives maximum
+
+      for (const action of validActions) {
+    // Vérifier le nombre de tentatives
+    if (action.attempts && action.attempts >= MAX_ATTEMPTS) {
+      continue;
+    }
+
     try {
       switch (action.type) {
         case 'join':
           if (action.eventId && action.userId) {
-            await joinEvent(action.eventId, action.userId);
+            // Appel direct à Firebase sans passer par la logique offline
+            const eventRef = doc(db, 'events', action.eventId);
+            await updateDoc(eventRef, {
+              participantsList: arrayUnion(action.userId),
+            });
             successfulActions.push(action.timestamp.toString());
           }
           break;
 
         case 'leave':
           if (action.eventId && action.userId) {
-            await leaveEvent(action.eventId, action.userId);
+            // Appel direct à Firebase sans passer par la logique offline
+            const eventRef = doc(db, 'events', action.eventId);
+            await updateDoc(eventRef, {
+              participantsList: arrayRemove(action.userId),
+            });
             successfulActions.push(action.timestamp.toString());
           }
           break;
 
         case 'create':
           if (action.eventData) {
-            await addEvent(action.eventData);
+            // Appel direct à Firebase sans passer par la logique offline
+            await addDoc(collection(db, 'events'), {
+              ...action.eventData,
+              required_participants: action.eventData.required_participants,
+              participantsList: action.eventData.participantsList || [],
+              creatorId: action.eventData.creatorId,
+            });
             successfulActions.push(action.timestamp.toString());
           }
           break;
 
         case 'delete':
           if (action.eventId) {
-            await deleteEvent(action.eventId);
+            // Appel direct à Firebase sans passer par la logique offline
+            const eventRef = doc(db, 'events', action.eventId);
+            await deleteDoc(eventRef);
             successfulActions.push(action.timestamp.toString());
           }
           break;
 
         case 'update':
           if (action.eventId && action.eventData) {
-            await updateEvent(action.eventId, action.eventData);
+            // Appel direct à Firebase sans passer par la logique offline
+            const eventRef = doc(db, 'events', action.eventId);
+            await updateDoc(eventRef, action.eventData);
             successfulActions.push(action.timestamp.toString());
           }
           break;
       }
-    } catch (error) {
-      // Erreur lors de la synchronisation de l'action
-    }
+                } catch (error) {
+          action.attempts = (action.attempts || 0) + 1;
+        }
   }
 
-  // Supprimer les actions synchronisées avec succès
-  if (successfulActions.length > 0) {
-    const remainingActions = actions.filter(action =>
-      !successfulActions.includes(action.timestamp.toString())
-    );
-    saveOfflineActions(remainingActions);
-  }
+  // Supprimer seulement les actions synchronisées avec succès
+  const remainingActions = actions.filter(action =>
+    !successfulActions.includes(action.timestamp.toString())
+  );
+
+  saveOfflineActions(remainingActions);
 };
 
 // Fonction pour récupérer les actions offline en attente
 export const getPendingOfflineActions = (): OfflineEventAction[] => {
   return getOfflineActions();
+};
+
+// Fonction pour nettoyer les actions en échec (pour le débogage)
+export const clearFailedOfflineActions = (): void => {
+  const actions = getOfflineActions();
+  const validActions = actions.filter(action =>
+    !action.attempts || action.attempts < 2
+  );
+  saveOfflineActions(validActions);
+};
+
+// Fonction pour nettoyer les actions anciennes (plus de 1 heure)
+export const clearOldOfflineActions = (): void => {
+  const actions = getOfflineActions();
+  const oneHourAgo = Date.now() - (60 * 60 * 1000);
+  const recentActions = actions.filter(action =>
+    action.timestamp > oneHourAgo
+  );
+  saveOfflineActions(recentActions);
+};
+
+// Fonction pour réinitialiser le cache offline (pour le débogage)
+export const resetOfflineActions = (): void => {
+  saveOfflineActions([]);
 };

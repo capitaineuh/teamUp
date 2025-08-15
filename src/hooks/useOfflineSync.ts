@@ -14,6 +14,7 @@ export const useOfflineSync = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [pendingActions, setPendingActions] = useState<OfflineAction[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isAutoSyncEnabled, setIsAutoSyncEnabled] = useState(true);
 
   // Fonction pour récupérer les actions offline des événements
   const getEventOfflineActions = () => {
@@ -24,24 +25,37 @@ export const useOfflineSync = () => {
     }
   };
 
-  // Mettre à jour le nombre d'actions en attente
+          // Mettre à jour le nombre d'actions en attente
   const updatePendingActionsCount = useCallback(() => {
+    if (!isAutoSyncEnabled || isSyncing) {
+      return;
+    }
+
     const eventActions = getEventOfflineActions();
+
     setPendingActions(prev => {
-      // Combiner les actions existantes avec les actions d'événements
-      const allActions = [...prev];
-      eventActions.forEach(action => {
-        allActions.push({
-          id: `event-${action.timestamp}`,
-          url: `/api/events/${action.type}`,
-          method: 'POST',
-          body: JSON.stringify(action),
-          timestamp: action.timestamp,
-        });
+      const existingEventActionIds = new Set(
+        prev
+          .filter(action => action.id?.startsWith('event-'))
+          .map(action => action.id)
+      );
+
+      const newEventActions = eventActions.filter(action => {
+        const actionId = `event-${action.timestamp}`;
+        return !existingEventActionIds.has(actionId);
       });
+
+      const allActions = [...prev, ...newEventActions.map(action => ({
+        id: `event-${action.timestamp}`,
+        url: `/api/events/${action.type}`,
+        method: 'POST',
+        body: JSON.stringify(action),
+        timestamp: action.timestamp,
+      }))];
+
       return allActions;
     });
-  }, []);
+  }, [isAutoSyncEnabled, isSyncing]);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -56,27 +70,30 @@ export const useOfflineSync = () => {
     };
   }, []);
 
-  const syncPendingActions = useCallback(async () => {
+    const syncPendingActions = useCallback(async () => {
     setIsSyncing(true);
+    setIsAutoSyncEnabled(false);
 
     try {
-      // Synchroniser d'abord les actions d'événements
       await syncOfflineActions();
 
-      // Envoyer un message au service worker pour synchroniser les autres actions
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage({
           type: 'SYNC_OFFLINE_ACTIONS'
         });
       }
 
-      // Attendre un peu pour laisser le service worker traiter
       await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Mettre à jour le compteur d'actions
       updatePendingActionsCount();
+
+      setTimeout(() => {
+        setIsAutoSyncEnabled(true);
+      }, 5000);
+
     } catch (error) {
-      // Erreur lors de la synchronisation
+      setTimeout(() => {
+        setIsAutoSyncEnabled(true);
+      }, 5000);
     } finally {
       setIsSyncing(false);
     }
@@ -93,22 +110,36 @@ export const useOfflineSync = () => {
   };
 
   useEffect(() => {
-    if (isOnline && pendingActions.length > 0) {
+    if (isOnline && pendingActions.length > 0 && isAutoSyncEnabled && !isSyncing) {
       syncPendingActions();
     }
-  }, [isOnline, pendingActions, syncPendingActions]);
+  }, [isOnline, pendingActions, syncPendingActions, isAutoSyncEnabled, isSyncing]);
 
-  // Mettre à jour le compteur d'actions quand la connectivité change
+    // Mettre à jour le compteur d'actions quand la connectivité change
   useEffect(() => {
     updatePendingActionsCount();
 
-    // Mettre à jour toutes les 5 secondes pour rester synchronisé
-    const interval = setInterval(updatePendingActionsCount, 5000);
+    if (isAutoSyncEnabled) {
+      const interval = setInterval(() => {
+        updatePendingActionsCount();
+      }, 30000);
 
-    return () => clearInterval(interval);
-  }, [isOnline, updatePendingActionsCount]);
+      return () => clearInterval(interval);
+    }
+  }, [isOnline, updatePendingActionsCount, isAutoSyncEnabled]);
 
-  const getOfflineStatus = () => {
+      const getOfflineStatus = () => {
+    if (!isAutoSyncEnabled) {
+      const eventActions = getEventOfflineActions();
+      const totalPendingActions = pendingActions.length + eventActions.length;
+
+      return {
+        status: 'syncing',
+        message: `Synchronisation en pause - ${totalPendingActions} action(s) en attente`,
+        color: '#F4D06F'
+      };
+    }
+
     const eventActions = getEventOfflineActions();
     const totalPendingActions = pendingActions.length + eventActions.length;
 
@@ -134,6 +165,8 @@ export const useOfflineSync = () => {
       color: '#9DD9D2'
     };
   };
+
+
 
   return {
     isOnline,

@@ -32,12 +32,7 @@ const OfflineStatus: React.FC = () => {
           </span>
         )}
 
-        {/* Indicateur de test temporaire */}
-        {process.env.NODE_ENV === 'development' && (
-          <span className="offline-status-debug" style={{ fontSize: '10px', opacity: 0.7 }}>
-            🧪 Mode dev - Testez le mode offline en désactivant votre connexion
-          </span>
-        )}
+
       </div>
     </div>
   );

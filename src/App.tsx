@@ -3,6 +3,7 @@ import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 import BottomNavbar from './components/BottomNavbar';
+import EmergencyCleanup from './components/EmergencyCleanup';
 import OfflineStatus from './components/OfflineStatus';
 import CreateEventScreen from './screens/CreateEventScreen';
 import HomeScreen from './screens/HomeScreen';
@@ -19,7 +20,9 @@ function App() {
 
   return (
     <div className="app-container">
+      <EmergencyCleanup />
       <OfflineStatus />
+
       <AnimatePresence mode='wait'>
         <Routes location={location} key={location.pathname}>
           <Route

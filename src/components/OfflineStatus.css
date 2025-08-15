@@ -38,6 +38,10 @@
   font-weight: 600;
 }
 
+
+
+
+
 @keyframes slideDown {
   from {
     transform: translateY(-100%);
