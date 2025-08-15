@@ -143,29 +143,78 @@ export const useOfflineSync = () => {
   useEffect(() => {
     updatePendingActionsCount();
 
+    // CRÉER UN INTERVALLE PLUS FRÉQUENT pour le nettoyage automatique
+    const cleanupInterval = setInterval(() => {
+      // VÉRIFICATION FORCÉE du nettoyage, même si auto-sync est désactivé
+      const totalActions = pendingActions.length + getEventOfflineActions().length;
+
+      if (totalActions > 100) {
+        // Désactiver temporairement l'auto-sync
+        setIsAutoSyncEnabled(false);
+
+        // Vider les actions en attente
+        setPendingActions([]);
+
+        // Nettoyer le localStorage
+        try {
+          localStorage.removeItem('teamup-offline-actions');
+        } catch (error) {
+          // Ignorer les erreurs de nettoyage
+        }
+
+        // Réactiver après 30 secondes
+        setTimeout(() => {
+          setIsAutoSyncEnabled(true);
+        }, 30000);
+      }
+    }, 10000); // Vérification toutes les 10 secondes
+
     if (isAutoSyncEnabled) {
-      const interval = setInterval(() => {
+      const syncInterval = setInterval(() => {
         updatePendingActionsCount();
       }, 30000);
 
-      return () => clearInterval(interval);
+      return () => {
+        clearInterval(cleanupInterval);
+        clearInterval(syncInterval);
+      };
     }
-  }, [isOnline, updatePendingActionsCount, isAutoSyncEnabled]);
 
-        const getOfflineStatus = () => {
+    return () => clearInterval(cleanupInterval);
+  }, [isOnline, updatePendingActionsCount, isAutoSyncEnabled, pendingActions.length]);
+
+          const getOfflineStatus = () => {
+    const eventActions = getEventOfflineActions();
+    const totalPendingActions = pendingActions.length + eventActions.length;
+
+    // NETTOYAGE D'URGENCE si trop d'actions (même en pause)
+    if (totalPendingActions > 100) {
+      // Déclencher le nettoyage immédiatement
+      setTimeout(() => {
+        setIsAutoSyncEnabled(false);
+        setPendingActions([]);
+        try {
+          localStorage.removeItem('teamup-offline-actions');
+        } catch (error) {
+          // Ignorer les erreurs
+        }
+        setTimeout(() => setIsAutoSyncEnabled(true), 30000);
+      }, 100);
+
+      return {
+        status: 'warning',
+        message: `🚨 URGENCE: ${totalPendingActions} actions - Nettoyage en cours...`,
+        color: '#FF0000'
+      };
+    }
+
     if (!isAutoSyncEnabled) {
-      const eventActions = getEventOfflineActions();
-      const totalPendingActions = pendingActions.length + eventActions.length;
-
       return {
         status: 'syncing',
         message: `Synchronisation en pause - ${totalPendingActions} action(s) en attente`,
         color: '#F4D06F'
       };
     }
-
-    const eventActions = getEventOfflineActions();
-    const totalPendingActions = pendingActions.length + eventActions.length;
 
     // AVERTISSEMENT si trop d'actions (risque de bombardement de la base)
     if (totalPendingActions > 50) {
@@ -201,6 +250,18 @@ export const useOfflineSync = () => {
 
 
 
+  // Fonction de nettoyage manuel pour la production
+  const forceCleanup = useCallback(() => {
+    setIsAutoSyncEnabled(false);
+    setPendingActions([]);
+    try {
+      localStorage.removeItem('teamup-offline-actions');
+    } catch (error) {
+      // Ignorer les erreurs
+    }
+    setTimeout(() => setIsAutoSyncEnabled(true), 30000);
+  }, []);
+
   return {
     isOnline,
     pendingActions: [...pendingActions, ...getEventOfflineActions()],
@@ -209,5 +270,6 @@ export const useOfflineSync = () => {
     syncPendingActions,
     getOfflineStatus,
     updatePendingActionsCount,
+    forceCleanup, // Exposer la fonction de nettoyage forcé
   };
 };

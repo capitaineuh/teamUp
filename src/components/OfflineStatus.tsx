@@ -5,7 +5,7 @@ import { useOfflineSync } from '../hooks/useOfflineSync';
 import './OfflineStatus.css';
 
 const OfflineStatus: React.FC = () => {
-  const { getOfflineStatus, pendingActions } = useOfflineSync();
+  const { getOfflineStatus, pendingActions, forceCleanup } = useOfflineSync();
   const status = getOfflineStatus();
 
   if (status.status === 'online' && pendingActions.length === 0) {
@@ -33,7 +33,16 @@ const OfflineStatus: React.FC = () => {
           </span>
         )}
 
-
+        {/* Bouton de nettoyage d'urgence si trop d'actions */}
+        {pendingActions.length > 100 && (
+          <button
+            onClick={forceCleanup}
+            className="emergency-cleanup-btn"
+            title="Nettoyer d'urgence le cache offline"
+          >
+            🧹 NETTOYER
+          </button>
+        )}
       </div>
     </div>
   );
