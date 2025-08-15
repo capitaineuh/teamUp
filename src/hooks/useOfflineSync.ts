@@ -58,11 +58,9 @@ export const useOfflineSync = () => {
       return allActions;
     });
 
-    // VÉRIFICATION SIMPLE : Nettoyage automatique si trop d'actions
+        // VÉRIFICATION SIMPLE : Nettoyage automatique si trop d'actions
     const totalActions = pendingActions.length + eventActions.length;
     if (totalActions > 100) {
-      console.warn(`🚨 NETTOYAGE AUTOMATIQUE - ${totalActions} actions détectées`);
-
       // Désactiver temporairement l'auto-sync
       setIsAutoSyncEnabled(false);
 
