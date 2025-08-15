@@ -3,7 +3,7 @@ import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 import BottomNavbar from './components/BottomNavbar';
-import OfflineStatus from './components/OfflineStatus';
+import { ConnectionStatus } from './components/ConnectionStatus';
 import CreateEventScreen from './screens/CreateEventScreen';
 import HomeScreen from './screens/HomeScreen';
 import MessagesScreen from './screens/MessagesScreen';
@@ -19,7 +19,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <OfflineStatus />
+      <ConnectionStatus />
 
       <AnimatePresence mode='wait'>
         <Routes location={location} key={location.pathname}>
