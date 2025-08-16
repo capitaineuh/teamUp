@@ -120,16 +120,44 @@ const HomeScreen = () => {
           >
             Prochains Événements
           </motion.h1>
-          <motion.button
-            className='filter-button'
-            onClick={() => setIsPreferencesModalVisible(true)}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M3 6H21M6 12H18M9 18H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-          </motion.button>
+          <div className='header-actions'>
+            <motion.button
+              className='filter-button'
+              onClick={() => setIsPreferencesModalVisible(true)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M3 6H21M6 12H18M9 18H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </motion.button>
+            {user ? (
+              <motion.button
+                className='auth-button auth-button-logout'
+                onClick={handleAuth}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title={`Se déconnecter (${user.displayName || user.email})`}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>Déconnexion</span>
+              </motion.button>
+            ) : (
+              <motion.button
+                className='auth-button auth-button-login'
+                onClick={handleAuth}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>Connexion</span>
+              </motion.button>
+            )}
+          </div>
         </div>
 
         <div className='search-section'>

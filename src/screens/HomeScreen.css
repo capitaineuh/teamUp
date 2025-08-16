@@ -39,6 +39,12 @@
   flex: 1;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .filter-button {
   background: none;
   border: none;
@@ -52,6 +58,55 @@
 .filter-button:hover {
   background-color: #f5f5f5;
   color: #333;
+}
+
+.auth-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.auth-button-login {
+  background-color: var(--primary-orange);
+  color: white;
+}
+
+.auth-button-login:hover {
+  background-color: var(--primary-orange-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--primary-orange-shadow);
+}
+
+.auth-button-logout {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.auth-button-logout:hover {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.auth-button svg {
+  flex-shrink: 0;
+}
+
+.auth-button span {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .auth-button span {
+    display: inline;
+  }
 }
 
 .search-section {

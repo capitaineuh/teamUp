@@ -139,14 +139,6 @@ const ProfileScreen: React.FC = () => {
   return (
     <div className='profile-screen' key={user?.uid || 'profile'}>
       <div className='profile-header'>
-        <motion.button
-          className='back-button'
-          onClick={() => navigate('/')}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          ← Retour
-        </motion.button>
         <h1>Mon Profil</h1>
       </div>
 
