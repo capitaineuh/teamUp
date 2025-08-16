@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../hooks/useAuth';
-import { addEvent, getEvents } from '../services/events';
+import { addEvent, getEvents, deleteEvent, updateEvent } from '../services/events';
 import './CreateEventScreen.css';
 
 const niveaux = ['débutant', 'intermédiaire', 'avancé', 'expert'];
@@ -13,6 +13,8 @@ const CreateEventScreen: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [myEvents, setMyEvents] = useState<any[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
+  const [editingEvent, setEditingEvent] = useState<string | null>(null);
+  const [deletingEvent, setDeletingEvent] = useState<string | null>(null);
   const [form, setForm] = useState({
     sport: '',
     niveau: 'débutant',
@@ -76,6 +78,86 @@ const CreateEventScreen: React.FC = () => {
     }
   }, [user?.uid]);
 
+  const handleEditEvent = (event: any) => {
+    setForm({
+      sport: event.sport,
+      niveau: event.niveau,
+      required_participants: event.required_participants,
+      lieu: event.lieu,
+      titre: event.titre,
+      description: event.description,
+    });
+    setEditingEvent(event.id);
+    setIsExpanded(true);
+    setError(null);
+    setSuccess(false);
+  };
+
+  const handleUpdateEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingEvent) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      await updateEvent(editingEvent, {
+        ...form,
+        required_participants: Number(form.required_participants),
+      });
+      setSuccess(true);
+      setEditingEvent(null);
+      // Réinitialiser le formulaire
+      setForm({
+        sport: '',
+        niveau: 'débutant',
+        required_participants: 2,
+        lieu: '',
+        titre: '',
+        description: '',
+      });
+      // Rafraîchir la liste
+      fetchMyEvents();
+      setTimeout(() => {
+        setSuccess(false);
+        setIsExpanded(false);
+      }, 1200);
+    } catch (err) {
+      setError("Erreur lors de la modification de l'évènement");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet évènement ?')) return;
+
+    setDeletingEvent(eventId);
+    try {
+      await deleteEvent(eventId);
+      setSuccess(true);
+      // Rafraîchir la liste
+      fetchMyEvents();
+      setTimeout(() => setSuccess(false), 1200);
+    } catch (err) {
+      setError("Erreur lors de la suppression de l'évènement");
+    } finally {
+      setDeletingEvent(null);
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingEvent(null);
+    setForm({
+      sport: '',
+      niveau: 'débutant',
+      required_participants: 2,
+      lieu: '',
+      titre: '',
+      description: '',
+    });
+    setError(null);
+  };
+
   useEffect(() => {
     fetchMyEvents();
   }, [fetchMyEvents]);
@@ -87,14 +169,14 @@ const CreateEventScreen: React.FC = () => {
           className='panel-header'
           onClick={toggleExpansion}
         >
-          <h1>Créer un évènement sportif</h1>
+          <h1>{editingEvent ? 'Modifier un évènement sportif' : 'Créer un évènement sportif'}</h1>
           <div className={`expand-icon ${isExpanded ? 'expanded' : ''}`}>
             ▼
           </div>
         </div>
 
         <div className={`panel-content ${isExpanded ? 'expanded' : ''}`}>
-          <form className='event-form' onSubmit={handleSubmit}>
+          <form className='event-form' onSubmit={editingEvent ? handleUpdateEvent : handleSubmit}>
             <div className='form-group'>
               <label htmlFor='sport'>Sport</label>
               <input
@@ -169,10 +251,26 @@ const CreateEventScreen: React.FC = () => {
               />
             </div>
             {error && <div className='error'>{error}</div>}
-            {success && <div className='success'>Évènement créé !</div>}
-            <button type='submit' className='submit-btn' disabled={loading}>
-              {loading ? 'Publication...' : "Poster l'évènement"}
-            </button>
+            {success && <div className='success'>
+              {editingEvent ? 'Évènement modifié !' : 'Évènement créé !'}
+            </div>}
+            <div className='form-actions'>
+              {editingEvent && (
+                <button
+                  type='button'
+                  className='cancel-btn'
+                  onClick={cancelEdit}
+                >
+                  Annuler
+                </button>
+              )}
+              <button type='submit' className='submit-btn' disabled={loading}>
+                {loading
+                  ? (editingEvent ? 'Modification...' : 'Publication...')
+                  : (editingEvent ? 'Modifier l\'évènement' : "Poster l'évènement")
+                }
+              </button>
+            </div>
           </form>
         </div>
       </div>
@@ -214,6 +312,22 @@ const CreateEventScreen: React.FC = () => {
                   </div>
                 </div>
                 <p className='event-description'>{event.description}</p>
+                <div className='event-actions'>
+                  <button
+                    className='edit-btn'
+                    onClick={() => handleEditEvent(event)}
+                    disabled={editingEvent === event.id}
+                  >
+                    {editingEvent === event.id ? 'Modification...' : 'Modifier'}
+                  </button>
+                  <button
+                    className='delete-btn'
+                    onClick={() => handleDeleteEvent(event.id)}
+                    disabled={deletingEvent === event.id}
+                  >
+                    {deletingEvent === event.id ? 'Suppression...' : 'Supprimer'}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
