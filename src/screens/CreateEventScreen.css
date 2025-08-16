@@ -370,7 +370,9 @@
 }
 
 .edit-btn,
-.delete-btn {
+.delete-btn,
+.confirm-delete-btn,
+.cancel-delete-btn {
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 8px;
@@ -409,6 +411,38 @@
 
 .delete-btn:disabled {
   background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.confirm-delete-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.confirm-delete-btn:hover:not(:disabled) {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+.confirm-delete-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cancel-delete-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.cancel-delete-btn:hover:not(:disabled) {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.cancel-delete-btn:disabled {
+  background: #495057;
   cursor: not-allowed;
   transform: none;
 }

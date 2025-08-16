@@ -15,6 +15,7 @@ const CreateEventScreen: React.FC = () => {
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [editingEvent, setEditingEvent] = useState<string | null>(null);
   const [deletingEvent, setDeletingEvent] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [form, setForm] = useState({
     sport: '',
     niveau: 'débutant',
@@ -129,11 +130,15 @@ const CreateEventScreen: React.FC = () => {
   };
 
   const handleDeleteEvent = async (eventId: string) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet évènement ?')) return;
+    setConfirmDelete(eventId);
+  };
 
-    setDeletingEvent(eventId);
+  const confirmDeleteEvent = async () => {
+    if (!confirmDelete) return;
+
+    setDeletingEvent(confirmDelete);
     try {
-      await deleteEvent(eventId);
+      await deleteEvent(confirmDelete);
       setSuccess(true);
       // Rafraîchir la liste
       fetchMyEvents();
@@ -142,7 +147,12 @@ const CreateEventScreen: React.FC = () => {
       setError("Erreur lors de la suppression de l'évènement");
     } finally {
       setDeletingEvent(null);
+      setConfirmDelete(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setConfirmDelete(null);
   };
 
   const cancelEdit = () => {
@@ -320,13 +330,32 @@ const CreateEventScreen: React.FC = () => {
                   >
                     {editingEvent === event.id ? 'Modification...' : 'Modifier'}
                   </button>
-                  <button
-                    className='delete-btn'
-                    onClick={() => handleDeleteEvent(event.id)}
-                    disabled={deletingEvent === event.id}
-                  >
-                    {deletingEvent === event.id ? 'Suppression...' : 'Supprimer'}
-                  </button>
+                  {confirmDelete === event.id ? (
+                    <>
+                      <button
+                        className='confirm-delete-btn'
+                        onClick={confirmDeleteEvent}
+                        disabled={deletingEvent === event.id}
+                      >
+                        {deletingEvent === event.id ? 'Suppression...' : 'Confirmer'}
+                      </button>
+                      <button
+                        className='cancel-delete-btn'
+                        onClick={cancelDelete}
+                        disabled={deletingEvent === event.id}
+                      >
+                        Annuler
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      className='delete-btn'
+                      onClick={() => handleDeleteEvent(event.id)}
+                      disabled={deletingEvent === event.id}
+                    >
+                      {deletingEvent === event.id ? 'Suppression...' : 'Supprimer'}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
