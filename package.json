@@ -34,17 +34,19 @@
     "build:no-lint": "set DISABLE_ESLINT_PLUGIN=true && react-scripts build",
     "deploy": "npm run build:no-lint && firebase deploy",
     "deploy:hosting": "npm run build:no-lint && firebase deploy --only hosting",
+    "deploy:smart": "node scripts/deploy.js",
     "clean:deploy": "Remove-Item -Recurse -Force build -ErrorAction SilentlyContinue && npm run build:no-lint && firebase deploy --only hosting --force",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
-    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
-    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,.tsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,.tsx,json,css,md}\"",
     "code:check": "npm run lint && npm run format:check",
     "code:fix": "npm run lint:fix && npm run format",
     "lint:report": "eslint src --ext .js,.jsx,.ts,.tsx --format json --output-file eslint-report.json",
     "sonar:analyze": "npm run lint:report && sonar-scanner",
     "ci": "npm run lint && npm run build",
-    "ci:full": "npm run lint && npm run build && npm test --if-present"
+    "ci:full": "npm run lint && npm run build && npm test --if-present",
+    "verify:assets": "node scripts/verify-assets.js"
   },
   "browserslist": {
     "production": [

@@ -1,29 +1,49 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+
+import { useConnectionStatus } from '../hooks/useConnectionStatus';
 import './ConnectionStatus.css';
 
 export const ConnectionStatus: React.FC = () => {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const { connectionQuality } = useConnectionStatus();
 
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+  // Fonction pour obtenir le texte de statut
+  const getStatusText = () => {
+    switch (connectionQuality) {
+      case 'good':
+        return 'En ligne';
+      case 'poor':
+        return 'Connexion lente';
+      case 'offline':
+        return 'Hors ligne';
+      default:
+        return 'En ligne';
+    }
+  };
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
+  // Fonction pour obtenir le titre de l'infobulle
+  const getStatusTitle = () => {
+    switch (connectionQuality) {
+      case 'good':
+        return 'Connecté à Internet - Connexion stable';
+      case 'poor':
+        return 'Connecté à Internet - Connexion lente ou instable';
+      case 'offline':
+        return 'Hors ligne - Aucune connexion Internet';
+      default:
+        return 'Connecté à Internet';
+    }
+  };
 
   return (
-    <div className="connection-status" title={isOnline ? 'Connecté à Internet' : 'Hors ligne'}>
+    <div
+      className={`connection-status ${connectionQuality}`}
+      title={getStatusTitle()}
+    >
       <div
-        className={`status-dot ${isOnline ? 'online' : 'offline'}`}
+        className={`status-dot ${connectionQuality}`}
       />
       <span className="status-text">
-        {isOnline ? 'En ligne' : 'Hors ligne'}
+        {getStatusText()}
       </span>
     </div>
   );
