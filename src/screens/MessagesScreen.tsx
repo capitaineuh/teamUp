@@ -76,7 +76,7 @@ const MessagesScreen = () => {
       }
     };
     run();
-  }, [summaries, user]);
+  }, [summaries, user, userCache]);
 
   const groupChats = useMemo(() => summaries.filter(s => s.type === 'group'), [summaries]);
   const individualChats = useMemo(() => summaries.filter(s => s.type === 'direct'), [summaries]);
