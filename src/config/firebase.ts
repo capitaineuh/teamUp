@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getDatabase } from 'firebase/database';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -9,11 +10,13 @@ const firebaseConfig = {
   storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
 };
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const rtdb = getDatabase(app, process.env.REACT_APP_FIREBASE_DATABASE_URL);
 export const googleProvider = new GoogleAuthProvider();
 
 // Configuration spécifique pour PWA
@@ -25,6 +28,10 @@ googleProvider.setCustomParameters({
 if (typeof window !== 'undefined') {
   // S'assurer que les headers sont préservés
   auth.useDeviceLanguage();
+  if (process.env.NODE_ENV === 'development') {
+    // eslint-disable-next-line no-console
+    console.warn('[firebase] RTDB URL', process.env.REACT_APP_FIREBASE_DATABASE_URL);
+  }
 }
 
 export default app;

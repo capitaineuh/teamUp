@@ -5,6 +5,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import BottomNavbar from './components/BottomNavbar';
 import { ConnectionNotification } from './components/ConnectionNotification';
 import { ConnectionStatus } from './components/ConnectionStatus';
+import ChatScreen from './screens/ChatScreen';
 import CreateEventScreen from './screens/CreateEventScreen';
 import HomeScreen from './screens/HomeScreen';
 import MessagesScreen from './screens/MessagesScreen';
@@ -78,6 +79,20 @@ function App() {
                 style={{ height: '100%' }}
               >
                 <MessagesScreen />
+              </motion.div>
+            }
+          />
+          <Route
+            path='/messages/:chatId'
+            element={
+              <motion.div
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -100 }}
+                transition={{ duration: 0.35 }}
+                style={{ height: '100%' }}
+              >
+                <ChatScreen />
               </motion.div>
             }
           />
