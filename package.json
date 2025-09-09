@@ -28,10 +28,10 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "set DISABLE_ESLINT_PLUGIN=true && react-scripts build",
+    "build": "set NODE_OPTIONS=--max-old-space-size=4096 && set DISABLE_ESLINT_PLUGIN=true && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "build:no-lint": "set DISABLE_ESLINT_PLUGIN=true && react-scripts build",
+    "build:no-lint": "set NODE_OPTIONS=--max-old-space-size=4096 && set DISABLE_ESLINT_PLUGIN=true && react-scripts build",
     "deploy": "npm run build:no-lint && firebase deploy",
     "deploy:hosting": "npm run build:no-lint && firebase deploy --only hosting",
     "deploy:smart": "node scripts/deploy.js",
