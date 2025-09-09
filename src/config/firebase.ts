@@ -3,13 +3,16 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getDatabase } from 'firebase/database';
 import { getFirestore } from 'firebase/firestore';
 
-// Debug: Vérifier les variables d'environnement
-console.log('Firebase Config Debug:', {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY ? 'Present' : 'Missing',
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN ? 'Present' : 'Missing',
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID ? 'Present' : 'Missing',
-  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL ? 'Present' : 'Missing',
-});
+// Debug: Vérifier les variables d'environnement (seulement en dev)
+if (process.env.NODE_ENV === 'development') {
+  // eslint-disable-next-line no-console
+  console.log('Firebase Config Debug:', {
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY ? 'Present' : 'Missing',
+    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN ? 'Present' : 'Missing',
+    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID ? 'Present' : 'Missing',
+    databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL ? 'Present' : 'Missing',
+  });
+}
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
