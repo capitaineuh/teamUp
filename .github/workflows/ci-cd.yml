@@ -56,6 +56,6 @@ jobs:
       run: |
         npm install -g firebase-tools
         echo "Deploying to Firebase Hosting..."
-        echo "Project ID: ${{ secrets.FIREBASE_PROJECT_ID }}"
+        echo "Project ID: ${{ secrets.REACT_APP_FIREBASE_PROJECT_ID }}"
         echo "Token exists: ${{ secrets.FIREBASE_TOKEN != '' }}"
-        firebase deploy --only hosting --project ${{ secrets.FIREBASE_PROJECT_ID }} --token ${{ secrets.FIREBASE_TOKEN }}
+        firebase deploy --only hosting --project ${{ secrets.REACT_APP_FIREBASE_PROJECT_ID }} --token ${{ secrets.FIREBASE_TOKEN }}
