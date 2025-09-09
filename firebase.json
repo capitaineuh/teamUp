@@ -12,19 +12,16 @@
         "destination": "/index.html"
       }
     ],
-    "redirects": [
-      {
-        "source": "/logo192.png",
-        "destination": "/logo192.png",
-        "type": 301
-      },
-      {
-        "source": "/logo512.png",
-        "destination": "/logo512.png",
-        "type": 301
-      }
-    ],
     "headers": [
+      {
+        "source": "/index.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      },
       {
         "source": "/static/**",
         "headers": [
