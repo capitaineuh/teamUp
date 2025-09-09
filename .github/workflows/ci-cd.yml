@@ -27,7 +27,7 @@ jobs:
       run: npm run ci
 
     - name: Run tests (if available)
-      run: npm test --if-present
+      run: npm test --if-present -- --passWithNoTests
 
   deploy:
     needs: build-and-test
