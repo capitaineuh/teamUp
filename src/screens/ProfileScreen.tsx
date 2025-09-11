@@ -28,6 +28,8 @@ const ProfileScreen: React.FC = () => {
   const [formData, setFormData] = useState<UserProfile>(initialFormData);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -105,6 +107,36 @@ const ProfileScreen: React.FC = () => {
       setShowToast(true);
     }
   };
+
+  const handleDeleteAccount = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteAccount = async () => {
+    if (deleteConfirmation.toLowerCase() !== 'supprimer') {
+      setToastMessage('Veuillez taper "SUPPRIMER" pour confirmer');
+      setShowToast(true);
+      return;
+    }
+
+    try {
+      // Fonction factice - à remplacer par la vraie implémentation
+      console.log('Suppression du compte demandée pour:', user?.uid);
+      setToastMessage('Fonctionnalité de suppression en cours de développement');
+      setShowToast(true);
+      setShowDeleteModal(false);
+      setDeleteConfirmation('');
+    } catch (err) {
+      setToastMessage('Erreur lors de la suppression du compte');
+      setShowToast(true);
+    }
+  };
+
+  const cancelDeleteAccount = () => {
+    setShowDeleteModal(false);
+    setDeleteConfirmation('');
+  };
+
 
   if (authLoading || profileLoading) {
     return (
@@ -271,6 +303,47 @@ const ProfileScreen: React.FC = () => {
         </motion.button>
       </form>
 
+      {/* Section Gestion des Droits RGPD */}
+      <div className='profile-section gdpr-section'>
+        <h2>Gestion de vos données personnelles</h2>
+        <div className='gdpr-info'>
+          <p>
+            Conformément au RGPD, vous disposez de droits sur vos données personnelles :
+          </p>
+          <ul>
+            <li>Droit d&apos;accès à vos données</li>
+            <li>Droit de rectification</li>
+            <li>Droit à l&apos;effacement (droit à l&apos;oubli)</li>
+            <li>Droit à la portabilité des données</li>
+          </ul>
+        </div>
+
+        <div className='gdpr-actions'>
+          <motion.button
+            type='button'
+            className='gdpr-button delete-button'
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleDeleteAccount}
+          >
+            🗑️ Supprimer mon compte
+          </motion.button>
+        </div>
+
+        <div className='gdpr-links'>
+          <motion.button
+            type='button'
+            className='gdpr-link-button'
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => navigate('/data-retention-policy')}
+          >
+            📋 Consulter la politique de rétention des données
+          </motion.button>
+        </div>
+
+      </div>
+
       <AnimatePresence>
         {showToast && (
           <Toast
@@ -280,6 +353,82 @@ const ProfileScreen: React.FC = () => {
             type={toastMessage.toLowerCase().includes('erreur') ? 'error' : 'success'}
             duration={3000}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Modal de confirmation de suppression */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <motion.div
+            className='delete-modal-overlay'
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={cancelDeleteAccount}
+          >
+            <motion.div
+              className='delete-modal'
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className='delete-modal-header'>
+                <h3>⚠️ Supprimer mon compte</h3>
+              </div>
+
+              <div className='delete-modal-content'>
+                <div className='warning-box'>
+                  <h4>Cette action est irréversible !</h4>
+                  <p>
+                    La suppression de votre compte entraînera :
+                  </p>
+                  <ul>
+                    <li>Suppression de votre profil utilisateur</li>
+                    <li>Suppression de tous vos messages de chat</li>
+                    <li>Retrait de votre participation aux événements</li>
+                    <li>Perte de toutes vos données personnelles</li>
+                  </ul>
+                </div>
+
+                <div className='confirmation-input'>
+                  <label htmlFor='deleteConfirmation'>
+                    Pour confirmer, tapez <strong>SUPPRIMER</strong> :
+                  </label>
+                  <input
+                    type='text'
+                    id='deleteConfirmation'
+                    value={deleteConfirmation}
+                    onChange={(e) => setDeleteConfirmation(e.target.value)}
+                    placeholder='SUPPRIMER'
+                    className='confirmation-field'
+                  />
+                </div>
+              </div>
+
+              <div className='delete-modal-actions'>
+                <motion.button
+                  type='button'
+                  className='cancel-button'
+                  onClick={cancelDeleteAccount}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Annuler
+                </motion.button>
+                <motion.button
+                  type='button'
+                  className='confirm-delete-button'
+                  onClick={confirmDeleteAccount}
+                  disabled={deleteConfirmation.toLowerCase() !== 'supprimer'}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Supprimer définitivement
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

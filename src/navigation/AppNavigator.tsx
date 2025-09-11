@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import ChatScreen from '../screens/ChatScreen';
+import DataRetentionPolicyScreen from '../screens/DataRetentionPolicyScreenTest';
 import HomeScreen from '../screens/HomeScreen';
 import MessagesScreen from '../screens/MessagesScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -13,6 +14,7 @@ const AppNavigator = () => {
       <Route path='/messages' element={<MessagesScreen />} />
       <Route path='/messages/:chatId' element={<ChatScreen />} />
       <Route path='/profile' element={<ProfileScreen />} />
+      <Route path='/data-retention-policy' element={<DataRetentionPolicyScreen />} />
       <Route path='*' element={<Navigate to='/' replace />} />
     </Routes>
   );
